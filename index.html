@@ -18,57 +18,177 @@
     --red: #ff4b4b;
 }
 
+* {
+    box-sizing: border-box;
+}
+
 body {
-    background: #000;
+    background: radial-gradient(circle at top, #222 0, #000 55%, #000 100%);
     color: var(--text);
     font-family: Consolas, "Fira Code", monospace;
     margin: 0;
+    min-height: 100vh;
     display: flex;
     justify-content: center;
+    align-items: center;
     padding: 30px;
 }
 
 .terminal {
     width: 100%;
-    max-width: 900px;
+    max-width: 950px;
     height: 85vh;
-    background: #0a0a0a;
-    border: 1px solid rgba(255,127,0,0.4);
-    box-shadow: 0 0 25px rgba(255,127,0,0.15);
-    border-radius: 14px;
+    background: #050505;
+    border-radius: 18px;
+    border: 1px solid rgba(255,127,0,0.45);
+    box-shadow:
+        0 0 40px rgba(0,0,0,0.9),
+        0 0 35px rgba(255,127,0,0.25);
     display: flex;
     flex-direction: column;
     overflow: hidden;
+    position: relative;
+}
+
+/* Лёгкие скан-линии */
+.terminal::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: repeating-linear-gradient(
+        to bottom,
+        rgba(255,255,255,0.04) 0px,
+        rgba(255,255,255,0.04) 1px,
+        transparent 1px,
+        transparent 3px
+    );
+    mix-blend-mode: soft-light;
+    opacity: 0.25;
+    pointer-events: none;
 }
 
 .header {
-    padding: 10px 12px;
-    background: #111;
-    border-bottom: 1px solid rgba(255,127,0,0.3);
+    position: relative;
+    z-index: 1;
+    padding: 8px 14px;
+    background: linear-gradient(90deg, #121212, #141414, #101010);
+    border-bottom: 1px solid rgba(255,127,0,0.4);
     font-size: 13px;
     color: var(--muted);
-}
-
-.output {
-    flex: 1;
-    padding: 12px;
-    overflow-y: auto;
-    background: radial-gradient(circle at top, rgba(255,127,0,0.1), #000 75%);
-}
-
-.input-box {
     display: flex;
-    padding: 8px 12px;
-    border-top: 1px solid rgba(255,127,0,0.3);
-    background: #000;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.header-left {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.window-dots {
+    display: flex;
+    gap: 4px;
+    margin-right: 8px;
+}
+
+.dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+}
+
+.dot.red { background:#ff5f56; }
+.dot.yellow { background:#ffbd2e; }
+.dot.green { background:#27c93f; }
+
+.header-title {
+    letter-spacing: 0.03em;
+}
+
+.header-right {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.status-pill {
+    border-radius: 999px;
+    border: 1px solid rgba(0,255,127,0.6);
+    padding: 2px 8px;
+    font-size: 11px;
+    color: var(--green);
+    text-transform: uppercase;
+}
+
+#repeatBtn {
+    background: rgba(255,127,0,0.08);
+    border: 1px solid rgba(255,127,0,0.7);
+    color: var(--accent-soft);
+    border-radius: 999px;
+    padding: 2px 10px;
+    font-size: 11px;
+    cursor: pointer;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+#repeatBtn:hover {
+    background: rgba(255,127,0,0.18);
+}
+
+/* Основной вывод */
+.output {
+    position: relative;
+    z-index: 1;
+    flex: 1;
+    padding: 14px 16px;
+    overflow-y: auto;
+    background: radial-gradient(circle at top left, rgba(255,127,0,0.13) 0, #050505 45%);
+}
+
+.output::-webkit-scrollbar {
+    width: 6px;
+}
+.output::-webkit-scrollbar-track {
+    background: #050505;
+}
+.output::-webkit-scrollbar-thumb {
+    background: rgba(255,127,0,0.7);
+    border-radius: 3px;
+}
+
+/* Ввод */
+.input-box {
+    position: relative;
+    z-index: 1;
+    display: flex;
+    align-items: center;
+    padding: 8px 14px 10px;
+    border-top: 1px solid rgba(255,127,0,0.4);
+    background: #020202;
 }
 
 .prompt {
     color: var(--accent-soft);
-    margin-right: 8px;
+    margin-right: 6px;
+    font-weight: 600;
+    position: relative;
 }
 
-input {
+/* Мигающий блок-курсор около промпта */
+.prompt::after {
+    content: "█";
+    margin-left: 4px;
+    color: var(--accent-soft);
+    animation: blink 1s steps(1) infinite;
+}
+
+@keyframes blink {
+    0%,50% { opacity: 1; }
+    50.01%,100% { opacity: 0; }
+}
+
+#inp {
     flex: 1;
     background: transparent;
     color: var(--text);
@@ -76,29 +196,80 @@ input {
     outline: none;
     font-family: inherit;
     font-size: 15px;
+    caret-color: var(--accent-soft);
 }
 
-.line { margin-bottom: 4px; }
+/* Линии */
+.line { 
+    margin-bottom: 2px; 
+    white-space: pre-wrap;
+    word-break: break-word;
+}
 .muted { color: var(--muted); }
 .info { color: var(--cyan); }
 .ok { color: var(--green); }
 .error { color: var(--red); }
 .warn { color: var(--accent-soft); }
-.banner { color: var(--accent); font-weight: bold; }
-.result-link { color: var(--accent-soft); text-decoration: none; }
+.banner {
+    color: var(--accent);
+    font-weight: bold;
+    text-shadow: 0 0 6px rgba(255,127,0,0.7);
+}
+.result-link { 
+    color: var(--accent-soft); 
+    text-decoration: none; 
+}
+.result-link:hover {
+    text-decoration: underline;
+}
+.result-title {
+    color: var(--green);
+    font-weight: 600;
+}
+.result-index {
+    color: var(--accent-soft);
+    font-weight: 700;
+}
+
+/* Небольшой глоу по низу */
+.terminal::after {
+    content: "";
+    position: absolute;
+    bottom: -40px;
+    left: 50%;
+    width: 60%;
+    height: 80px;
+    transform: translateX(-50%);
+    background: radial-gradient(circle, rgba(255,127,0,0.3) 0, transparent 60%);
+    opacity: 0.7;
+    pointer-events: none;
+}
 </style>
 </head>
 
 <body>
 
 <div class="terminal">
-    <div class="header">WebScraper-Pro — Terminal Browser Edition</div>
+    <div class="header">
+        <div class="header-left">
+            <div class="window-dots">
+                <div class="dot red"></div>
+                <div class="dot yellow"></div>
+                <div class="dot green"></div>
+            </div>
+            <div class="header-title">WebScraper-Pro — Terminal Browser Edition</div>
+        </div>
+        <div class="header-right">
+            <div class="status-pill">online</div>
+            <button id="repeatBtn" title="Повторить последний поиск">↻ repeat</button>
+        </div>
+    </div>
 
     <div class="output" id="out"></div>
 
     <div class="input-box">
         <div class="prompt">webscraper&gt;</div>
-        <input id="inp" type="text" autofocus autocomplete="off" placeholder='пример: search ip scan -a 5'>
+        <input id="inp" type="text" autocomplete="off" placeholder='пример: search ip scan -a 5'>
     </div>
 </div>
 
@@ -107,35 +278,81 @@ input {
 /* ============ JS ЛОГИКА ============ */
 const out = document.getElementById("out");
 const inp = document.getElementById("inp");
+const repeatBtn = document.getElementById("repeatBtn");
+
+/* CORS-прокси */
+const PROXY = "https://api.allorigins.win/raw?url=";
 const BING = "https://www.bing.com/search?q=";
 
-function line(text="", cls="") {
-    let div = document.createElement("div");
-    div.className = "line " + cls;
+/* История команд */
+const history = [];
+let historyIndex = -1;
+
+/* Автодополнение */
+const COMMANDS = ["search", "clear", "help", "date", "about", "repeat"];
+
+/* Для repeat */
+let lastQuery = null;
+let lastAmount = null;
+
+/* Вывод строки */
+function line(text = "", cls = "") {
+    const div = document.createElement("div");
+    div.className = "line" + (cls ? " " + cls : "");
     div.innerHTML = text;
     out.appendChild(div);
     out.scrollTop = out.scrollHeight;
 }
 
+/* Анимация "печати" строки */
+function typeLine(text = "", cls = "", speed = 8) {
+    const div = document.createElement("div");
+    div.className = "line" + (cls ? " " + cls : "");
+    out.appendChild(div);
+    out.scrollTop = out.scrollHeight;
+    let i = 0;
+    function tick() {
+        div.textContent = text.slice(0, i);
+        out.scrollTop = out.scrollHeight;
+        i++;
+        if (i <= text.length) {
+            setTimeout(tick, speed);
+        }
+    }
+    tick();
+}
+
+/* Баннер */
 function banner() {
-    line(" __        __     _     ____                                      ", "banner");
-    line(" \\ \\      / / ___| |__ |  _ \\ _ __ ___   ___ _ __  _ __   ___ _ __", "banner");
-    line("  \\ \\ /\\ / / / _ \\ '_ \\| |_) | '__/ _ \\ / _ \\ '_ \\| '_ \\ / _ \\ '__|", "banner");
-    line("   \\ V  V / |  __/ |_) |  __/| | | (_) |  __/ |_) | |_) |  __/ |   ", "banner");
-    line("    \\_/\\_/   \\___|_.__/|_|   |_|  \\___/ \\___| .__/| .__/ \\___|_|   ", "banner");
-    line("                                           |_|   |_|                ", "banner");
-    line();
-    line("Команды: search, clear, help", "muted");
-    line();
+    typeLine(" __        __     _     ____                                      ", "banner", 4);
+    typeLine(" \\ \\      / / ___| |__ |  _ \\ _ __ ___   ___ _ __  _ __   ___ _ __", "banner", 4);
+    typeLine("  \\ \\ /\\ / / / _ \\ '_ \\| |_) | '__/ _ \\ / _ \\ '_ \\| '_ \\ / _ \\ '__|", "banner", 4);
+    typeLine("   \\ V  V / |  __/ |_) |  __/| | | (_) |  __/ |_) | |_) |  __/ |   ", "banner", 4);
+    typeLine("    \\_/\\_/   \\___|_.__/|_|   |_|  \\___/ \\___| .__/| .__/ \\___|_|   ", "banner", 4);
+    typeLine("                                           |_|   |_|                ", "banner", 4);
+    setTimeout(() => {
+        line();
+        line("Учебный терминал WebScraper-Pro (Bing, через CORS-прокси)", "muted");
+        line("Команды: search, clear, help, date, about, repeat", "muted");
+        line();
+    }, 500);
 }
 
 banner();
 
-function parseCommand(cmd) {
+/* Разбор команды */
+function parseCommand(cmdRaw) {
+    const cmd = cmdRaw.trim();
+    if (!cmd) return;
+
     line("webscraper> " + cmd, "muted");
 
-    let p = cmd.trim().split(" ");
-    let base = p[0];
+    // сохраняем в историю
+    history.push(cmd);
+    historyIndex = history.length;
+
+    const parts = cmd.split(" ").filter(Boolean);
+    const base = parts[0].toLowerCase();
 
     if (base === "clear") {
         out.innerHTML = "";
@@ -144,90 +361,116 @@ function parseCommand(cmd) {
     }
 
     if (base === "help") {
-        line("search <запрос> -a N    выполнить поиск", "info");
-        line("clear                   очистить", "info");
+        line("Доступные команды:", "info");
+        line("  search <запрос> -a N  — поиск в Bing, N результатов (по умолчанию 10)", "muted");
+        line("  repeat                — повторить последний search", "muted");
+        line("  date                  — показать текущую дату/время", "muted");
+        line("  about                 — инфо о терминале", "muted");
+        line("  clear                 — очистить экран", "muted");
+        line("  help                  — эта справка", "muted");
+        line();
+        return;
+    }
+
+    if (base === "date") {
+        const now = new Date();
+        line("[i] " + now.toLocaleString(), "info");
+        line();
+        return;
+    }
+
+    if (base === "about") {
+        line("WebScraper-Pro — Browser Terminal Edition", "ok");
+        line("Учебная версия: Bing HTML + CORS-прокси (AllOrigins)", "muted");
+        line("Автор кода: Educational Example (адаптация под браузер)", "muted");
+        line();
+        return;
+    }
+
+    if (base === "repeat") {
+        if (lastQuery) {
+            line("[i] Повторяю последний запрос: " + lastQuery + " (-a " + lastAmount + ")", "info");
+            search(lastQuery, lastAmount);
+        } else {
+            line("[~] Ещё не было ни одного search.", "warn");
+        }
         return;
     }
 
     if (base === "search") {
         let amount = 10;
-        let query = [];
+        let queryParts = [];
 
-        for (let i=1; i<p.length; i++) {
-            if (p[i] === "-a" && p[i+1]) {
-                amount = parseInt(p[i+1]) || 10;
+        for (let i = 1; i < parts.length; i++) {
+            if (parts[i] === "-a" && parts[i + 1]) {
+                const n = parseInt(parts[i + 1], 10);
+                if (!isNaN(n) && n > 0) amount = n;
                 i++;
             } else {
-                query.push(p[i]);
+                queryParts.push(parts[i]);
             }
         }
 
-        let q = query.join(" ").trim();
-        if (!q) {
-            line("[!] Укажи запрос!", "error");
+        const query = queryParts.join(" ").trim();
+        if (!query) {
+            line("[!] Укажи запрос. Пример: search ip scan -a 5", "error");
             return;
         }
 
-        search(q, amount);
+        lastQuery = query;
+        lastAmount = amount;
+        search(query, amount);
         return;
     }
 
-    line("[!] Неизвестная команда.", "error");
+    line("[!] Неизвестная команда. Напиши 'help'.", "error");
 }
 
+/* Поиск через прокси */
 async function search(q, amount) {
     line("[i] Запрос: " + q, "info");
-    const url = BING + encodeURIComponent(q);
-    line("[i] URL: " + url, "info");
+    const target = BING + encodeURIComponent(q);
+    const url = PROXY + encodeURIComponent(target);
+    line("[i] Через прокси: " + url, "info");
     line();
-
-    let resp;
-    try {
-        resp = await fetch(url);
-    } catch (e) {
-        line("[!] Ошибка соединения: " + e, "error");
-        return;
-    }
-
-    if (!resp.ok) {
-        line("[!] Bing вернул " + resp.status, "error");
-        return;
-    }
 
     let html;
     try {
+        const resp = await fetch(url);
+        if (!resp.ok) {
+            line("[!] Прокси вернул ошибку " + resp.status, "error");
+            return;
+        }
         html = await resp.text();
-    } catch (e) {
-        line("[!] CORS блокирует чтение HTML", "error");
-        line("[~] Создай простой backend-прокси, если хочешь рабочий парсер.", "warn");
+    } catch (err) {
+        line("[!] Ошибка запроса: " + err, "error");
         return;
     }
 
-    const parser = new DOMParser();
-    const doc = parser.parseFromString(html, "text/html");
+    const doc = new DOMParser().parseFromString(html, "text/html");
     const results = doc.querySelectorAll("li.b_algo");
 
-    if (results.length === 0) {
-        line("[~] Bing ничего не дал или структура изменилась.", "warn");
+    if (!results || results.length === 0) {
+        line("[~] Ничего не найдено или Bing сменил разметку.", "warn");
+        line();
         return;
     }
 
-    let show = Math.min(amount, results.length);
+    const show = Math.min(amount, results.length);
     line("[+] Найдено: " + results.length + " | Показываю: " + show, "ok");
     line();
 
-    for (let i=0; i<show; i++) {
-        let b = results[i];
-
-        let a = b.querySelector("h2 a");
+    for (let i = 0; i < show; i++) {
+        const b = results[i];
+        const a = b.querySelector("h2 a");
         if (!a) continue;
 
-        let title = a.textContent.trim();
-        let link = a.href;
-        let snip = b.querySelector("p") ? b.querySelector("p").textContent.trim() : "";
+        const title = a.textContent.trim();
+        const link = a.href;
+        const snip = b.querySelector("p") ? b.querySelector("p").textContent.trim() : "";
 
-        line((i+1) + ". " + title, "ok");
-        line(`<a class="result-link" href="${link}" target="_blank">URL: ${link}</a>`);
+        line(`<span class="result-index">${i + 1}.</span> <span class="result-title">${title}</span>`, "ok");
+        line(`<a class="result-link" href="${link}" target="_blank" rel="noopener noreferrer">URL: ${link}</a>`);
         if (snip) line("   " + snip);
         line();
     }
@@ -236,11 +479,63 @@ async function search(q, amount) {
     line();
 }
 
-inp.addEventListener("keydown", e => {
+/* Обработка клавиатуры */
+inp.addEventListener("keydown", (e) => {
     if (e.key === "Enter") {
-        let cmd = inp.value;
+        const value = inp.value;
         inp.value = "";
-        parseCommand(cmd);
+        parseCommand(value);
+        return;
+    }
+
+    // История команд ↑ / ↓
+    if (e.key === "ArrowUp") {
+        if (history.length === 0) return;
+        if (historyIndex > 0) historyIndex--;
+        inp.value = history[historyIndex] || "";
+        setTimeout(() => inp.setSelectionRange(inp.value.length, inp.value.length), 0);
+        e.preventDefault();
+        return;
+    }
+
+    if (e.key === "ArrowDown") {
+        if (history.length === 0) return;
+        if (historyIndex < history.length - 1) {
+            historyIndex++;
+            inp.value = history[historyIndex];
+        } else {
+            historyIndex = history.length;
+            inp.value = "";
+        }
+        setTimeout(() => inp.setSelectionRange(inp.value.length, inp.value.length), 0);
+        e.preventDefault();
+        return;
+    }
+
+    // Автодополнение по Tab
+    if (e.key === "Tab") {
+        const val = inp.value.trim();
+        const parts = val.split(" ");
+        if (parts.length === 1 && parts[0].length > 0) {
+            const prefix = parts[0].toLowerCase();
+            const matches = COMMANDS.filter(c => c.startsWith(prefix));
+            if (matches.length === 1) {
+                inp.value = matches[0] + " ";
+                setTimeout(() => inp.setSelectionRange(inp.value.length, inp.value.length), 0);
+            }
+        }
+        e.preventDefault();
+    }
+});
+
+/* Кнопка repeat в шапке */
+repeatBtn.addEventListener("click", () => {
+    if (lastQuery) {
+        line("webscraper> repeat", "muted");
+        line("[i] Повторяю последний запрос: " + lastQuery + " (-a " + lastAmount + ")", "info");
+        search(lastQuery, lastAmount);
+    } else {
+        line("[~] Повторять нечего — сначала сделай search.", "warn");
     }
 });
 </script>
