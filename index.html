@@ -2,7 +2,7 @@
 <html lang="ru">
 <head>
 <meta charset="UTF-8">
-<title>macOS Web Desktop PRO</title>
+<title>macOS Web Desktop + Safari</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <style>
     * {
@@ -168,12 +168,12 @@
         flex-direction: column;
         overflow: hidden;
         opacity: 0;
-        transform: scale(0.9) translateY(10px);
+        transform: scale(0.92) translateY(15px);
         transform-origin: center top;
         transition:
-            transform 0.22s ease,
-            opacity 0.22s ease,
-            box-shadow 0.18s ease;
+            opacity .22s ease,
+            transform .22s ease,
+            box-shadow .18s ease;
         z-index: 50;
     }
     .window.visible {
@@ -185,8 +185,11 @@
     }
     .window.minimizing {
         transform-origin: bottom center;
+        transform: scale(0.55) translateY(60px);
         opacity: 0;
-        transform: scale(0.6) translateY(40px);
+        transition:
+            opacity .22s ease,
+            transform .22s cubic-bezier(.35,.25,.05,1.00);
     }
     .window-titlebar {
         height: 28px;
@@ -307,6 +310,59 @@
         margin: 4px 0;
     }
 
+    /* ===== SAFARI ===== */
+    .safari-content {
+        padding: 0;
+        display: flex;
+        flex-direction: column;
+    }
+    .safari-toolbar {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        padding: 6px 8px;
+        background: rgba(15,16,26,0.95);
+        border-bottom: 1px solid rgba(255,255,255,0.08);
+    }
+    .safari-btn {
+        border: none;
+        border-radius: 999px;
+        padding: 3px 8px;
+        font-size: 12px;
+        background: rgba(255,255,255,0.06);
+        color: #e5e5e5;
+        cursor: pointer;
+    }
+    .safari-btn:disabled {
+        opacity: 0.4;
+        cursor: default;
+    }
+    .safari-btn:hover:not(:disabled) {
+        background: rgba(255,255,255,0.16);
+    }
+    .safari-url-input {
+        flex: 1;
+        padding: 4px 10px;
+        border-radius: 999px;
+        border: 1px solid rgba(255,255,255,0.18);
+        background: rgba(10,10,18,0.95);
+        color: #e5e5e5;
+        font-size: 12px;
+        outline: none;
+    }
+    .safari-url-input::placeholder {
+        color: #888;
+    }
+    .safari-view {
+        flex: 1;
+        background: #050510;
+    }
+    .safari-view iframe {
+        width: 100%;
+        height: 100%;
+        border: none;
+        background: #050510;
+    }
 </style>
 </head>
 <body>
@@ -325,7 +381,7 @@
             <span class="menu-item">Help</span>
         </div>
         <div class="menubar-center">
-            <span>macOS Web Desktop PRO</span>
+            <span>macOS Web Desktop + Safari</span>
         </div>
         <div class="menubar-right">
             <span>🔋</span>
@@ -344,6 +400,10 @@
             <div class="desktop-icon-img">💻</div>
             <span>About This Mac</span>
         </div>
+        <div class="desktop-icon" data-open="safari">
+            <div class="desktop-icon-img">🌐</div>
+            <span>Safari</span>
+        </div>
     </div>
 
     <!-- ДОК -->
@@ -351,6 +411,10 @@
         <div class="dock" id="dock">
             <div class="dock-item" data-open="finder" title="Finder">
                 <span>📁</span>
+                <div class="dock-dot"></div>
+            </div>
+            <div class="dock-item" data-open="safari" title="Safari">
+                <span>🌐</span>
                 <div class="dock-dot"></div>
             </div>
             <div class="dock-item" data-open="code" title="Code">
@@ -383,13 +447,13 @@
         <div class="window-content">
             <p>Добро пожаловать в веб-клон рабочего стола <b>macOS</b> 🔥</p>
             <p style="margin-top:8px;">
-                Окна можно перетаскивать, сворачивать в док, открывать через иконки и док.
-                Правый клик по рабочему столу и иконкам — своё меню.
+                Окна перетаскиваются, сворачиваются в док, открываются через иконки и док.
+                Правый клик по рабочему столу, окну или иконке — контекстное меню.
             </p>
             <pre>
 Desktop
  ├─ Projects
- │   ├─ macos_web_desktop_pro.html
+ │   ├─ macos_desktop_safari.html
  │   └─ notes.txt
  └─ Screenshots
             </pre>
@@ -441,9 +505,9 @@ Desktop
         <div class="window-content">
             <p><b>Идеи:</b></p>
             <ul style="margin-top:6px; margin-left:16px;">
-                <li>Сделать больше типов окон (Safari, Settings, Terminal)</li>
-                <li>Повесить реальные действия на контекстное меню</li>
+                <li>Добавить ещё окна (Terminal, Settings)</li>
                 <li>Сохранять состояние в localStorage</li>
+                <li>Сделать смену тем</li>
             </ul>
         </div>
         <div class="window-footer">
@@ -466,12 +530,40 @@ Desktop
             <p style="font-size:18px; margin-bottom:4px;">macOS — Web Edition</p>
             <p>Version 1.0 (HTML/CSS/JS)</p>
             <p style="margin-top:10px;">Процессор: твой браузер</p>
-            <p>Память: пока вкладка жива</p>
+            <p>Память: пока вкладка открыта</p>
             <p>Графика: CSS, JS и немного наглости</p>
         </div>
         <div class="window-footer">
             <span class="tag-pill">System</span>
             <span>© Ты, владелец этой вкладки</span>
+        </div>
+    </div>
+
+    <!-- SAFARI -->
+    <div class="window hidden" data-id="safari">
+        <div class="window-titlebar">
+            <div class="title-buttons">
+                <div class="btn-circle btn-close" data-action="close"></div>
+                <div class="btn-circle btn-minimize" data-action="minimize"></div>
+                <div class="btn-circle btn-full" data-action="maximize"></div>
+            </div>
+            <div class="window-title">Safari</div>
+        </div>
+        <div class="window-content safari-content">
+            <div class="safari-toolbar">
+                <button class="safari-btn safari-back" title="Назад">←</button>
+                <button class="safari-btn safari-forward" title="Вперёд">→</button>
+                <button class="safari-btn safari-reload" title="Обновить">⟳</button>
+                <input class="safari-url-input" type="text" placeholder="Введите URL, например: https://example.com">
+                <button class="safari-btn safari-go" title="Перейти">Go</button>
+            </div>
+            <div class="safari-view">
+                <iframe class="safari-frame"></iframe>
+            </div>
+        </div>
+        <div class="window-footer">
+            <span class="tag-pill">Safari</span>
+            <span>WebKit (почти)</span>
         </div>
     </div>
 
@@ -511,18 +603,15 @@ Desktop
     updateClock();
     setInterval(updateClock, 10000);
 
-    const windows = document.querySelectorAll('.window');
+    const desktopRoot = document.getElementById('desktop-root');
+    const dock = document.getElementById('dock');
     const dockItems = document.querySelectorAll('.dock-item');
     const desktopIcons = document.querySelectorAll('.desktop-icon');
-    const dock = document.getElementById('dock');
-    const desktopRoot = document.getElementById('desktop-root');
+    const windows = document.querySelectorAll('.window');
     const ctxMenu = document.getElementById('context-menu');
-    let zIndexBase = 10;
 
-    let ctxState = {
-        type: null,   // "desktop" | "icon" | "window"
-        target: null
-    };
+    let zIndexBase = 10;
+    let ctxState = { type: null, target: null };
 
     function bringToFront(win) {
         zIndexBase += 1;
@@ -533,17 +622,15 @@ Desktop
 
     function setDockActive(id, active) {
         const dockItem = document.querySelector('.dock-item[data-open="'+id+'"]');
-        if (dockItem) {
-            dockItem.classList.toggle('active', active);
-        }
+        if (dockItem) dockItem.classList.toggle('active', active);
     }
 
     function openWindow(id) {
         const win = document.querySelector('.window[data-id="'+id+'"]');
         if (!win) return;
-        const wasHidden = win.classList.contains('hidden');
-
         win.classList.remove('hidden');
+        win.classList.remove('minimizing');
+        win.classList.remove('visible');
         requestAnimationFrame(() => {
             win.classList.add('visible');
         });
@@ -561,18 +648,17 @@ Desktop
     }
 
     function minimizeWindow(win) {
+        const id = win.getAttribute('data-id');
         win.classList.add('minimizing');
         win.classList.remove('visible');
-        const id = win.getAttribute('data-id');
         setTimeout(() => {
             win.classList.add('hidden');
             win.classList.remove('minimizing');
         }, 230);
-        // Иконка в доке остаётся активной
-        setDockActive(id, true);
+        setDockActive(id, true); // приложение остаётся "запущенным"
     }
 
-    // ===== ДОК: открытие окон =====
+    // ===== ДОК: открытие =====
     dockItems.forEach(item => {
         item.addEventListener('click', () => {
             const id = item.getAttribute('data-open');
@@ -590,7 +676,7 @@ Desktop
         });
     });
 
-    // ===== ДОК: эффект увеличения (магнифай) =====
+    // ===== ДОК: эффект увеличения =====
     dock.addEventListener('mousemove', (e) => {
         const mouseX = e.clientX;
         const maxDist = 120;
@@ -600,9 +686,9 @@ Desktop
             const dist = Math.abs(mouseX - centerX);
             let scale = 1.0;
             if (dist < maxDist) {
-                scale = 1.4 - (dist / maxDist) * 0.4; // 1.4 → 1.0
+                scale = 1.4 - (dist / maxDist) * 0.4;
             }
-            const offsetY = (1 - scale) * 18; // чуть подпрыгивает
+            const offsetY = (1 - scale) * 18;
             item.style.transform = `translateY(${offsetY}px) scale(${scale})`;
         });
     });
@@ -612,7 +698,7 @@ Desktop
         });
     });
 
-    // ===== ИКОНКИ: двойной клик — открыть окно =====
+    // ===== ИКОНКИ: двойной клик =====
     desktopIcons.forEach(icon => {
         icon.addEventListener('dblclick', () => {
             const id = icon.getAttribute('data-open');
@@ -620,7 +706,7 @@ Desktop
         });
     });
 
-    // ===== КНОПКИ УПРАВЛЕНИЯ ОКНОМ =====
+    // ===== КНОПКИ ОКОН + ПЕРЕТАСКИВАНИЕ =====
     windows.forEach(win => {
         const titlebar = win.querySelector('.window-titlebar');
         const buttons = win.querySelectorAll('.btn-circle');
@@ -651,7 +737,6 @@ Desktop
             });
         });
 
-        // перетаскивание
         let isDragging = false;
         let offsetX = 0, offsetY = 0;
 
@@ -701,7 +786,6 @@ Desktop
         ctxState.type = type;
         ctxState.target = target;
 
-        // Настройка видимости пунктов под контекст
         const items = ctxMenu.querySelectorAll('.cm-item');
         items.forEach(item => {
             const scope = (item.dataset.scope || '').split(',').map(s => s.trim());
@@ -715,19 +799,12 @@ Desktop
 
         ctxMenu.style.left = x + 'px';
         ctxMenu.style.top = y + 'px';
-
-        // Не выходить за край
         const rect = ctxMenu.getBoundingClientRect();
         let nx = x, ny = y;
-        if (rect.right > window.innerWidth) {
-            nx = window.innerWidth - rect.width - 6;
-        }
-        if (rect.bottom > window.innerHeight) {
-            ny = window.innerHeight - rect.height - 6;
-        }
+        if (rect.right > window.innerWidth) nx = window.innerWidth - rect.width - 6;
+        if (rect.bottom > window.innerHeight) ny = window.innerHeight - rect.height - 6;
         ctxMenu.style.left = nx + 'px';
         ctxMenu.style.top = ny + 'px';
-
         ctxMenu.classList.add('visible');
     }
 
@@ -738,26 +815,20 @@ Desktop
     }
 
     document.addEventListener('click', (e) => {
-        if (!ctxMenu.contains(e.target)) {
-            hideContextMenu();
-        }
+        if (!ctxMenu.contains(e.target)) hideContextMenu();
     });
     document.addEventListener('scroll', hideContextMenu, true);
     document.addEventListener('keydown', (e) => {
         if (e.key === 'Escape') hideContextMenu();
     });
 
-    // Правый клик
     document.addEventListener('contextmenu', (e) => {
         const inMenu = e.target.closest('.context-menu');
         if (inMenu) return;
 
         const inMenubar = e.target.closest('.menubar');
         const inDock = e.target.closest('.dock-wrapper');
-        if (inMenubar || inDock) {
-            // Дадим стандартное меню браузера здесь
-            return;
-        }
+        if (inMenubar || inDock) return; // браузерное меню
 
         e.preventDefault();
 
@@ -773,7 +844,6 @@ Desktop
         }
     });
 
-    // Клик по пунктам контекстного меню
     ctxMenu.addEventListener('click', (e) => {
         const item = e.target.closest('.cm-item');
         if (!item) return;
@@ -791,9 +861,7 @@ Desktop
             const label = target.querySelector('span');
             const current = label.textContent.trim();
             const name = prompt('Новое имя:', current);
-            if (name && name.trim()) {
-                label.textContent = name.trim();
-            }
+            if (name && name.trim()) label.textContent = name.trim();
         }
 
         if (action === 'delete' && type === 'icon') {
@@ -836,7 +904,85 @@ Desktop
         hideContextMenu();
     });
 
-    // ОТКРЫТЬ FINDER ПО УМОЛЧАНИЮ
+    // ===== SAFARI БРАУЗЕР =====
+    const safariWin = document.querySelector('.window[data-id="safari"]');
+    const safariFrame = safariWin.querySelector('.safari-frame');
+    const safariUrlInput = safariWin.querySelector('.safari-url-input');
+    const safariBackBtn = safariWin.querySelector('.safari-back');
+    const safariForwardBtn = safariWin.querySelector('.safari-forward');
+    const safariReloadBtn = safariWin.querySelector('.safari-reload');
+    const safariGoBtn = safariWin.querySelector('.safari-go');
+
+    const safariHome = 'https://example.com/';
+    let safariHistory = [];
+    let safariPos = -1;
+
+    function normalizeUrl(url) {
+        url = url.trim();
+        if (!url) return safariHome;
+        if (!/^https?:\/\//i.test(url)) {
+            url = 'https://' + url;
+        }
+        return url;
+    }
+
+    function safariUpdateButtons() {
+        safariBackBtn.disabled = safariPos <= 0;
+        safariForwardBtn.disabled = safariPos === -1 || safariPos >= safariHistory.length - 1;
+    }
+
+    function safariLoad(url, addToHistory = true) {
+        const finalUrl = normalizeUrl(url);
+        safariFrame.src = finalUrl;
+        safariUrlInput.value = finalUrl;
+        if (addToHistory) {
+            safariHistory = safariHistory.slice(0, safariPos + 1);
+            safariHistory.push(finalUrl);
+            safariPos = safariHistory.length - 1;
+        }
+        safariUpdateButtons();
+    }
+
+    safariBackBtn.addEventListener('click', () => {
+        if (safariPos > 0) {
+            safariPos -= 1;
+            safariFrame.src = safariHistory[safariPos];
+            safariUrlInput.value = safariHistory[safariPos];
+            safariUpdateButtons();
+        }
+    });
+
+    safariForwardBtn.addEventListener('click', () => {
+        if (safariPos < safariHistory.length - 1) {
+            safariPos += 1;
+            safariFrame.src = safariHistory[safariPos];
+            safariUrlInput.value = safariHistory[safariPos];
+            safariUpdateButtons();
+        }
+    });
+
+    safariReloadBtn.addEventListener('click', () => {
+        if (safariPos >= 0) {
+            safariFrame.src = safariHistory[safariPos];
+        } else {
+            safariLoad(safariHome, true);
+        }
+    });
+
+    safariGoBtn.addEventListener('click', () => {
+        safariLoad(safariUrlInput.value, true);
+    });
+
+    safariUrlInput.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') {
+            safariLoad(safariUrlInput.value, true);
+        }
+    });
+
+    // Инициализация домашней страницы
+    safariLoad(safariHome, true);
+
+    // ===== ОТКРЫТЬ FINDER ПО УМОЛЧАНИЮ =====
     openWindow('finder');
 </script>
 </body>
