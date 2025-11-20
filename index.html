@@ -2,10 +2,9 @@
 <html lang="ru">
 <head>
 <meta charset="UTF-8">
-<title>macOS Web Desktop</title>
+<title>macOS Web Desktop PRO</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <style>
-    /* ОБЩЕЕ */
     * {
         box-sizing: border-box;
         margin: 0;
@@ -23,14 +22,13 @@
         color: #fff;
     }
 
-    /* ОБОИ/РАБОЧИЙ СТОЛ */
     .desktop {
         position: relative;
         width: 100%;
         height: 100%;
     }
 
-    /* ВЕРХНЯЯ ПАНЕЛЬ (MENU BAR) */
+    /* ===== ВЕРХНЯЯ ПАНЕЛЬ ===== */
     .menubar {
         position: absolute;
         top: 0;
@@ -44,7 +42,7 @@
         justify-content: space-between;
         padding: 0 8px;
         font-size: 12px;
-        -webkit-app-region: drag;
+        z-index: 1000;
     }
     .menubar-left, .menubar-center, .menubar-right {
         display: flex;
@@ -64,7 +62,7 @@
         background: rgba(255,255,255,0.1);
     }
 
-    /* ИКОНКИ НА РАБОЧЕМ СТОЛЕ */
+    /* ===== ИКОНКИ НА РАБОЧЕМ СТОЛЕ ===== */
     .desktop-icons {
         position: absolute;
         top: 40px;
@@ -74,9 +72,10 @@
         gap: 16px;
         font-size: 11px;
         text-align: center;
+        z-index: 10;
     }
     .desktop-icon {
-        width: 64px;
+        width: 70px;
         cursor: default;
     }
     .desktop-icon-img {
@@ -97,7 +96,7 @@
         word-break: break-word;
     }
 
-    /* ДОК */
+    /* ===== ДОК ===== */
     .dock-wrapper {
         position: absolute;
         left: 50%;
@@ -109,6 +108,7 @@
         backdrop-filter: blur(20px);
         border: 1px solid rgba(255,255,255,0.14);
         box-shadow: 0 18px 40px rgba(0,0,0,0.65);
+        z-index: 900;
     }
     .dock {
         display: flex;
@@ -128,14 +128,13 @@
         justify-content: center;
         font-size: 26px;
         cursor: pointer;
-        transition: transform 0.18s ease, box-shadow 0.18s ease;
         position: relative;
+        transition: box-shadow 0.15s ease;
     }
-    .dock-item:hover {
-        transform: translateY(-6px) scale(1.06);
+    .dock-item.active {
         box-shadow:
-            0 20px 30px rgba(0,0,0,0.85),
-            0 0 0 1px rgba(255,255,255,0.25);
+            0 16px 30px rgba(0,0,0,0.85),
+            0 0 0 1px rgba(255,255,255,0.28);
     }
     .dock-dot {
         position: absolute;
@@ -151,7 +150,7 @@
         opacity: 1;
     }
 
-    /* ОКНА */
+    /* ===== ОКНА ===== */
     .window {
         position: absolute;
         top: 80px;
@@ -159,7 +158,8 @@
         width: 560px;
         min-width: 320px;
         min-height: 240px;
-        background: rgba(18,18,22,0.96);
+        background: rgba(18,18,22,0.70);
+        backdrop-filter: blur(28px) saturate(140%);
         border-radius: 12px;
         box-shadow:
             0 22px 55px rgba(0,0,0,0.85),
@@ -167,9 +167,26 @@
         display: flex;
         flex-direction: column;
         overflow: hidden;
+        opacity: 0;
+        transform: scale(0.9) translateY(10px);
+        transform-origin: center top;
+        transition:
+            transform 0.22s ease,
+            opacity 0.22s ease,
+            box-shadow 0.18s ease;
+        z-index: 50;
+    }
+    .window.visible {
+        opacity: 1;
+        transform: scale(1) translateY(0);
     }
     .window.hidden {
         display: none;
+    }
+    .window.minimizing {
+        transform-origin: bottom center;
+        opacity: 0;
+        transform: scale(0.6) translateY(40px);
     }
     .window-titlebar {
         height: 28px;
@@ -230,7 +247,6 @@
         justify-content: space-between;
         align-items: center;
     }
-
     .tag-pill {
         padding: 2px 8px;
         border-radius: 999px;
@@ -239,30 +255,62 @@
         text-transform: uppercase;
         letter-spacing: 0.04em;
     }
-
-    /* ПОДСВЕТКА ФОКУСА ОКНА */
     .window.active {
         box-shadow:
-            0 25px 60px rgba(0,0,0,0.95),
-            0 0 0 1px rgba(138,180,255,0.7);
+            0 28px 65px rgba(0,0,0,0.95),
+            0 0 0 1px rgba(138,180,255,0.8);
     }
 
-    /* АНИМАЦИЯ ПОЯВЛЕНИЯ */
-    .window {
-        opacity: 0;
-        transform: scale(0.95) translateY(10px);
-        animation: fadeInWin 0.2s forwards;
+    /* ===== КОНТЕКСТНОЕ МЕНЮ ===== */
+    .context-menu {
+        position: absolute;
+        min-width: 170px;
+        background: rgba(18,18,22,0.96);
+        border-radius: 10px;
+        box-shadow: 0 18px 40px rgba(0,0,0,0.85);
+        border: 1px solid rgba(255,255,255,0.15);
+        padding: 4px 0;
+        font-size: 13px;
+        z-index: 1200;
+        backdrop-filter: blur(18px);
+        display: none;
     }
-    @keyframes fadeInWin {
-        to {
-            opacity: 1;
-            transform: scale(1) translateY(0);
-        }
+    .context-menu.visible {
+        display: block;
+        animation: cmFade 0.13s ease-out;
     }
+    @keyframes cmFade {
+        from { opacity: 0; transform: scale(0.96) translateY(4px); }
+        to { opacity: 1; transform: scale(1) translateY(0); }
+    }
+    .cm-item {
+        padding: 4px 14px;
+        cursor: default;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 10px;
+    }
+    .cm-item span {
+        pointer-events: none;
+    }
+    .cm-item:hover {
+        background: rgba(255,255,255,0.08);
+    }
+    .cm-item-disabled {
+        opacity: 0.4;
+        pointer-events: none;
+    }
+    .cm-separator {
+        height: 1px;
+        background: rgba(255,255,255,0.10);
+        margin: 4px 0;
+    }
+
 </style>
 </head>
 <body>
-<div class="desktop">
+<div class="desktop" id="desktop-root">
 
     <!-- ВЕРХНЯЯ ПАНЕЛЬ -->
     <div class="menubar">
@@ -277,7 +325,7 @@
             <span class="menu-item">Help</span>
         </div>
         <div class="menubar-center">
-            <span>macOS Web Desktop</span>
+            <span>macOS Web Desktop PRO</span>
         </div>
         <div class="menubar-right">
             <span>🔋</span>
@@ -287,7 +335,7 @@
     </div>
 
     <!-- ИКОНКИ НА РАБОЧЕМ СТОЛЕ -->
-    <div class="desktop-icons">
+    <div class="desktop-icons" id="desktop-icons">
         <div class="desktop-icon" data-open="finder">
             <div class="desktop-icon-img">📁</div>
             <span>Macintosh HD</span>
@@ -300,7 +348,7 @@
 
     <!-- ДОК -->
     <div class="dock-wrapper">
-        <div class="dock">
+        <div class="dock" id="dock">
             <div class="dock-item" data-open="finder" title="Finder">
                 <span>📁</span>
                 <div class="dock-dot"></div>
@@ -333,14 +381,15 @@
             <div class="window-title">Finder — Desktop</div>
         </div>
         <div class="window-content">
-            <p>Добро пожаловать в веб-копию рабочего стола <b>macOS</b> 🔥</p>
+            <p>Добро пожаловать в веб-клон рабочего стола <b>macOS</b> 🔥</p>
             <p style="margin-top:8px;">
-                Это просто демо: окна можно перетаскивать, открывать через док и иконки.
+                Окна можно перетаскивать, сворачивать в док, открывать через иконки и док.
+                Правый клик по рабочему столу и иконкам — своё меню.
             </p>
             <pre>
 Desktop
  ├─ Projects
- │   ├─ macos_web_desktop.html
+ │   ├─ macos_web_desktop_pro.html
  │   └─ notes.txt
  └─ Screenshots
             </pre>
@@ -362,7 +411,7 @@ Desktop
             <div class="window-title">index.html — WebDesktop</div>
         </div>
         <div class="window-content">
-            <p>Здесь мог бы быть твой код 😈</p>
+            <p>Здесь может жить твой код 😈</p>
             <pre>&lt;!-- Минималка для старта --&gt;
 &lt;html&gt;
   &lt;head&gt;
@@ -392,9 +441,9 @@ Desktop
         <div class="window-content">
             <p><b>Идеи:</b></p>
             <ul style="margin-top:6px; margin-left:16px;">
-                <li>Сделать запускаемые иконки приложений</li>
-                <li>Добавить анимацию сворачивания в док</li>
-                <li>Привязать окна к границам экрана</li>
+                <li>Сделать больше типов окон (Safari, Settings, Terminal)</li>
+                <li>Повесить реальные действия на контекстное меню</li>
+                <li>Сохранять состояние в localStorage</li>
             </ul>
         </div>
         <div class="window-footer">
@@ -416,20 +465,43 @@ Desktop
         <div class="window-content">
             <p style="font-size:18px; margin-bottom:4px;">macOS — Web Edition</p>
             <p>Version 1.0 (HTML/CSS/JS)</p>
-            <p style="margin-top:10px;">Процессор: Whatever inside your browser</p>
-            <p>Память: бесконечная (почти)</p>
-            <p>Графика: CSS + немного магии</p>
+            <p style="margin-top:10px;">Процессор: твой браузер</p>
+            <p>Память: пока вкладка жива</p>
+            <p>Графика: CSS, JS и немного наглости</p>
         </div>
         <div class="window-footer">
             <span class="tag-pill">System</span>
-            <span>© Ты, текущий владелец этой вкладки</span>
+            <span>© Ты, владелец этой вкладки</span>
+        </div>
+    </div>
+
+    <!-- КОНТЕКСТНОЕ МЕНЮ -->
+    <div class="context-menu" id="context-menu">
+        <div class="cm-item" data-action="open" data-scope="icon">
+            <span>Открыть</span><span>⏎</span>
+        </div>
+        <div class="cm-item" data-action="rename" data-scope="icon">
+            <span>Переименовать</span><span>✏️</span>
+        </div>
+        <div class="cm-item" data-action="delete" data-scope="icon">
+            <span>Удалить</span><span>⌫</span>
+        </div>
+        <div class="cm-item" data-action="properties" data-scope="icon,window">
+            <span>Свойства</span><span>⌘I</span>
+        </div>
+        <div class="cm-separator"></div>
+        <div class="cm-item" data-action="new-folder" data-scope="desktop,window">
+            <span>Создать папку</span><span>⇧⌘N</span>
+        </div>
+        <div class="cm-item" data-action="wallpaper" data-scope="desktop">
+            <span>Обои…</span><span>🖼️</span>
         </div>
     </div>
 
 </div>
 
 <script>
-    // ЧАСЫ В ПРАВОМ ВЕРХУ
+    // ===== ЧАСЫ =====
     function updateClock() {
         const el = document.getElementById('clock');
         const now = new Date();
@@ -439,11 +511,18 @@ Desktop
     updateClock();
     setInterval(updateClock, 10000);
 
-    // ОТКРЫТИЕ ОКОН
     const windows = document.querySelectorAll('.window');
     const dockItems = document.querySelectorAll('.dock-item');
     const desktopIcons = document.querySelectorAll('.desktop-icon');
+    const dock = document.getElementById('dock');
+    const desktopRoot = document.getElementById('desktop-root');
+    const ctxMenu = document.getElementById('context-menu');
     let zIndexBase = 10;
+
+    let ctxState = {
+        type: null,   // "desktop" | "icon" | "window"
+        target: null
+    };
 
     function bringToFront(win) {
         zIndexBase += 1;
@@ -452,43 +531,96 @@ Desktop
         win.classList.add('active');
     }
 
+    function setDockActive(id, active) {
+        const dockItem = document.querySelector('.dock-item[data-open="'+id+'"]');
+        if (dockItem) {
+            dockItem.classList.toggle('active', active);
+        }
+    }
+
     function openWindow(id) {
         const win = document.querySelector('.window[data-id="'+id+'"]');
         if (!win) return;
+        const wasHidden = win.classList.contains('hidden');
+
         win.classList.remove('hidden');
+        requestAnimationFrame(() => {
+            win.classList.add('visible');
+        });
         bringToFront(win);
-        const dockItem = document.querySelector('.dock-item[data-open="'+id+'"]');
-        if (dockItem) dockItem.classList.add('active');
+        setDockActive(id, true);
     }
 
     function closeWindow(win) {
         const id = win.getAttribute('data-id');
-        win.classList.add('hidden');
-        const dockItem = document.querySelector('.dock-item[data-open="'+id+'"]');
-        if (dockItem) dockItem.classList.remove('active');
+        win.classList.remove('visible');
+        setTimeout(() => {
+            win.classList.add('hidden');
+        }, 220);
+        setDockActive(id, false);
     }
 
+    function minimizeWindow(win) {
+        win.classList.add('minimizing');
+        win.classList.remove('visible');
+        const id = win.getAttribute('data-id');
+        setTimeout(() => {
+            win.classList.add('hidden');
+            win.classList.remove('minimizing');
+        }, 230);
+        // Иконка в доке остаётся активной
+        setDockActive(id, true);
+    }
+
+    // ===== ДОК: открытие окон =====
     dockItems.forEach(item => {
         item.addEventListener('click', () => {
             const id = item.getAttribute('data-open');
             const win = document.querySelector('.window[data-id="'+id+'"]');
+            if (!win) return;
             if (win.classList.contains('hidden')) {
                 openWindow(id);
             } else {
-                // если уже открыто — просто поднять наверх
+                if (!win.classList.contains('visible')) {
+                    win.classList.remove('hidden');
+                    requestAnimationFrame(() => win.classList.add('visible'));
+                }
                 bringToFront(win);
             }
         });
     });
 
-    desktopIcons.forEach(icon => {
-        icon.addEventListener('dblclick', () => {
-            const id = icon.getAttribute('data-open');
-            openWindow(id);
+    // ===== ДОК: эффект увеличения (магнифай) =====
+    dock.addEventListener('mousemove', (e) => {
+        const mouseX = e.clientX;
+        const maxDist = 120;
+        dockItems.forEach(item => {
+            const rect = item.getBoundingClientRect();
+            const centerX = rect.left + rect.width / 2;
+            const dist = Math.abs(mouseX - centerX);
+            let scale = 1.0;
+            if (dist < maxDist) {
+                scale = 1.4 - (dist / maxDist) * 0.4; // 1.4 → 1.0
+            }
+            const offsetY = (1 - scale) * 18; // чуть подпрыгивает
+            item.style.transform = `translateY(${offsetY}px) scale(${scale})`;
+        });
+    });
+    dock.addEventListener('mouseleave', () => {
+        dockItems.forEach(item => {
+            item.style.transform = '';
         });
     });
 
-    // КНОПКИ ОКНА (СВЕРНУТЬ/ЗАКРЫТЬ/ФУЛЛ)
+    // ===== ИКОНКИ: двойной клик — открыть окно =====
+    desktopIcons.forEach(icon => {
+        icon.addEventListener('dblclick', () => {
+            const id = icon.getAttribute('data-open');
+            if (id) openWindow(id);
+        });
+    });
+
+    // ===== КНОПКИ УПРАВЛЕНИЯ ОКНОМ =====
     windows.forEach(win => {
         const titlebar = win.querySelector('.window-titlebar');
         const buttons = win.querySelectorAll('.btn-circle');
@@ -499,7 +631,7 @@ Desktop
                 if (action === 'close') {
                     closeWindow(win);
                 } else if (action === 'minimize') {
-                    win.classList.add('hidden');
+                    minimizeWindow(win);
                 } else if (action === 'maximize') {
                     if (win.dataset.maximized === '1') {
                         win.style.top = '80px';
@@ -546,8 +678,6 @@ Desktop
             win.style.left = x + 'px';
             win.style.top = y + 'px';
             win.dataset.maximized = '0';
-            win.style.width = win.style.width || '560px';
-            win.style.height = win.style.height || 'auto';
         });
 
         document.addEventListener('mouseup', () => {
@@ -556,6 +686,154 @@ Desktop
         });
 
         win.addEventListener('mousedown', () => bringToFront(win));
+    });
+
+    // ===== КОНТЕКСТНОЕ МЕНЮ =====
+    const wallpapers = [
+        'radial-gradient(circle at top left, #4e6cfb, #151827 60%, #050510)',
+        'radial-gradient(circle at top, #ff7f50, #441122 55%, #050308)',
+        'radial-gradient(circle at center, #10b981, #064e3b 55%, #020617)',
+        'radial-gradient(circle at top right, #f97316, #1e1b4b 60%, #020617)'
+    ];
+    let currentWallpaper = 0;
+
+    function showContextMenu(x, y, type, target) {
+        ctxState.type = type;
+        ctxState.target = target;
+
+        // Настройка видимости пунктов под контекст
+        const items = ctxMenu.querySelectorAll('.cm-item');
+        items.forEach(item => {
+            const scope = (item.dataset.scope || '').split(',').map(s => s.trim());
+            if (scope.includes(type)) {
+                item.classList.remove('cm-item-disabled');
+                item.style.display = 'flex';
+            } else {
+                item.style.display = 'none';
+            }
+        });
+
+        ctxMenu.style.left = x + 'px';
+        ctxMenu.style.top = y + 'px';
+
+        // Не выходить за край
+        const rect = ctxMenu.getBoundingClientRect();
+        let nx = x, ny = y;
+        if (rect.right > window.innerWidth) {
+            nx = window.innerWidth - rect.width - 6;
+        }
+        if (rect.bottom > window.innerHeight) {
+            ny = window.innerHeight - rect.height - 6;
+        }
+        ctxMenu.style.left = nx + 'px';
+        ctxMenu.style.top = ny + 'px';
+
+        ctxMenu.classList.add('visible');
+    }
+
+    function hideContextMenu() {
+        ctxMenu.classList.remove('visible');
+        ctxState.type = null;
+        ctxState.target = null;
+    }
+
+    document.addEventListener('click', (e) => {
+        if (!ctxMenu.contains(e.target)) {
+            hideContextMenu();
+        }
+    });
+    document.addEventListener('scroll', hideContextMenu, true);
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') hideContextMenu();
+    });
+
+    // Правый клик
+    document.addEventListener('contextmenu', (e) => {
+        const inMenu = e.target.closest('.context-menu');
+        if (inMenu) return;
+
+        const inMenubar = e.target.closest('.menubar');
+        const inDock = e.target.closest('.dock-wrapper');
+        if (inMenubar || inDock) {
+            // Дадим стандартное меню браузера здесь
+            return;
+        }
+
+        e.preventDefault();
+
+        const icon = e.target.closest('.desktop-icon');
+        const win = e.target.closest('.window');
+
+        if (icon) {
+            showContextMenu(e.clientX, e.clientY, 'icon', icon);
+        } else if (win) {
+            showContextMenu(e.clientX, e.clientY, 'window', win);
+        } else {
+            showContextMenu(e.clientX, e.clientY, 'desktop', desktopRoot);
+        }
+    });
+
+    // Клик по пунктам контекстного меню
+    ctxMenu.addEventListener('click', (e) => {
+        const item = e.target.closest('.cm-item');
+        if (!item) return;
+        const action = item.dataset.action;
+        const type = ctxState.type;
+        const target = ctxState.target;
+        if (!type) return;
+
+        if (action === 'open' && type === 'icon') {
+            const id = target.getAttribute('data-open');
+            if (id) openWindow(id);
+        }
+
+        if (action === 'rename' && type === 'icon') {
+            const label = target.querySelector('span');
+            const current = label.textContent.trim();
+            const name = prompt('Новое имя:', current);
+            if (name && name.trim()) {
+                label.textContent = name.trim();
+            }
+        }
+
+        if (action === 'delete' && type === 'icon') {
+            if (confirm('Удалить эту иконку с рабочего стола?')) {
+                target.remove();
+            }
+        }
+
+        if (action === 'properties' && (type === 'icon' || type === 'window')) {
+            let info = '';
+            if (type === 'icon') {
+                const label = target.querySelector('span').textContent.trim();
+                const id = target.getAttribute('data-open') || 'нет приложения';
+                info = `Тип: ярлык\nИмя: ${label}\nПриложение: ${id}`;
+            } else {
+                const id = target.getAttribute('data-id');
+                const title = target.querySelector('.window-title').textContent.trim();
+                info = `Тип: окно\nID: ${id}\nЗаголовок: ${title}`;
+            }
+            alert(info);
+        }
+
+        if (action === 'new-folder' && (type === 'desktop' || type === 'window')) {
+            const iconsContainer = document.getElementById('desktop-icons');
+            const div = document.createElement('div');
+            div.className = 'desktop-icon';
+            div.innerHTML = `
+                <div class="desktop-icon-img">📂</div>
+                <span>Новая папка</span>
+            `;
+            iconsContainer.appendChild(div);
+            div.addEventListener('dblclick', () => {});
+        }
+
+        if (action === 'wallpaper' && type === 'desktop') {
+            currentWallpaper = (currentWallpaper + 1) % wallpapers.length;
+            document.body.style.background = wallpapers[currentWallpaper];
+        }
+
+        hideContextMenu();
     });
 
     // ОТКРЫТЬ FINDER ПО УМОЛЧАНИЮ
