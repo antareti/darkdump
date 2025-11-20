@@ -2,543 +2,564 @@
 <html lang="ru">
 <head>
 <meta charset="UTF-8">
-<title>WebScraper-Pro — Terminal Edition</title>
+<title>macOS Web Desktop</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
 <style>
-/* ============ СТИЛИ ============ */
-:root {
-    --bg: #050505;
-    --accent: #ff7f00;
-    --accent-soft: #ffa31a;
-    --text: #f5f5f5;
-    --muted: #888;
-    --green: #00ff7f;
-    --cyan: #00e5ff;
-    --red: #ff4b4b;
-}
+    /* ОБЩЕЕ */
+    * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+        user-select: none;
+    }
+    html, body {
+        width: 100%;
+        height: 100%;
+        overflow: hidden;
+        font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", system-ui, sans-serif;
+    }
+    body {
+        background: radial-gradient(circle at top left, #4e6cfb, #151827 60%, #050510);
+        color: #fff;
+    }
 
-* {
-    box-sizing: border-box;
-}
+    /* ОБОИ/РАБОЧИЙ СТОЛ */
+    .desktop {
+        position: relative;
+        width: 100%;
+        height: 100%;
+    }
 
-body {
-    background: radial-gradient(circle at top, #222 0, #000 55%, #000 100%);
-    color: var(--text);
-    font-family: Consolas, "Fira Code", monospace;
-    margin: 0;
-    min-height: 100vh;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    padding: 30px;
-}
+    /* ВЕРХНЯЯ ПАНЕЛЬ (MENU BAR) */
+    .menubar {
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 24px;
+        background: rgba(10,10,10,0.82);
+        backdrop-filter: blur(18px);
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 0 8px;
+        font-size: 12px;
+        -webkit-app-region: drag;
+    }
+    .menubar-left, .menubar-center, .menubar-right {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+    .apple-logo {
+        font-size: 14px;
+        margin-right: 6px;
+    }
+    .menu-item {
+        padding: 0 4px;
+        border-radius: 3px;
+        cursor: default;
+    }
+    .menu-item:hover {
+        background: rgba(255,255,255,0.1);
+    }
 
-.terminal {
-    width: 100%;
-    max-width: 950px;
-    height: 85vh;
-    background: #050505;
-    border-radius: 18px;
-    border: 1px solid rgba(255,127,0,0.45);
-    box-shadow:
-        0 0 40px rgba(0,0,0,0.9),
-        0 0 35px rgba(255,127,0,0.25);
-    display: flex;
-    flex-direction: column;
-    overflow: hidden;
-    position: relative;
-}
+    /* ИКОНКИ НА РАБОЧЕМ СТОЛЕ */
+    .desktop-icons {
+        position: absolute;
+        top: 40px;
+        right: 14px;
+        display: flex;
+        flex-direction: column;
+        gap: 16px;
+        font-size: 11px;
+        text-align: center;
+    }
+    .desktop-icon {
+        width: 64px;
+        cursor: default;
+    }
+    .desktop-icon-img {
+        width: 48px;
+        height: 48px;
+        margin: 0 auto 4px;
+        border-radius: 10px;
+        background: rgba(255,255,255,0.18);
+        border: 1px solid rgba(255,255,255,0.35);
+        box-shadow: 0 10px 25px rgba(0,0,0,0.45);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 24px;
+    }
+    .desktop-icon span {
+        text-shadow: 0 1px 2px rgba(0,0,0,0.7);
+        word-break: break-word;
+    }
 
-/* Лёгкие скан-линии */
-.terminal::before {
-    content: "";
-    position: absolute;
-    inset: 0;
-    background: repeating-linear-gradient(
-        to bottom,
-        rgba(255,255,255,0.04) 0px,
-        rgba(255,255,255,0.04) 1px,
-        transparent 1px,
-        transparent 3px
-    );
-    mix-blend-mode: soft-light;
-    opacity: 0.25;
-    pointer-events: none;
-}
+    /* ДОК */
+    .dock-wrapper {
+        position: absolute;
+        left: 50%;
+        bottom: 10px;
+        transform: translateX(-50%);
+        padding: 4px 10px;
+        border-radius: 16px;
+        background: rgba(15,15,20,0.75);
+        backdrop-filter: blur(20px);
+        border: 1px solid rgba(255,255,255,0.14);
+        box-shadow: 0 18px 40px rgba(0,0,0,0.65);
+    }
+    .dock {
+        display: flex;
+        align-items: flex-end;
+        gap: 10px;
+    }
+    .dock-item {
+        width: 52px;
+        height: 52px;
+        border-radius: 14px;
+        background: linear-gradient(145deg, #2b2f4a, #111322);
+        box-shadow:
+            0 12px 22px rgba(0,0,0,0.7),
+            0 0 0 1px rgba(255,255,255,0.15);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 26px;
+        cursor: pointer;
+        transition: transform 0.18s ease, box-shadow 0.18s ease;
+        position: relative;
+    }
+    .dock-item:hover {
+        transform: translateY(-6px) scale(1.06);
+        box-shadow:
+            0 20px 30px rgba(0,0,0,0.85),
+            0 0 0 1px rgba(255,255,255,0.25);
+    }
+    .dock-dot {
+        position: absolute;
+        bottom: 4px;
+        width: 6px;
+        height: 6px;
+        border-radius: 50%;
+        background: #fff;
+        opacity: 0;
+        transition: opacity 0.15s ease;
+    }
+    .dock-item.active .dock-dot {
+        opacity: 1;
+    }
 
-.header {
-    position: relative;
-    z-index: 1;
-    padding: 8px 14px;
-    background: linear-gradient(90deg, #121212, #141414, #101010);
-    border-bottom: 1px solid rgba(255,127,0,0.4);
-    font-size: 13px;
-    color: var(--muted);
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-}
+    /* ОКНА */
+    .window {
+        position: absolute;
+        top: 80px;
+        left: 120px;
+        width: 560px;
+        min-width: 320px;
+        min-height: 240px;
+        background: rgba(18,18,22,0.96);
+        border-radius: 12px;
+        box-shadow:
+            0 22px 55px rgba(0,0,0,0.85),
+            0 0 0 1px rgba(255,255,255,0.12);
+        display: flex;
+        flex-direction: column;
+        overflow: hidden;
+    }
+    .window.hidden {
+        display: none;
+    }
+    .window-titlebar {
+        height: 28px;
+        display: flex;
+        align-items: center;
+        padding: 0 10px;
+        gap: 10px;
+        background: linear-gradient(to bottom, #22232b, #161721);
+        border-bottom: 1px solid rgba(255,255,255,0.05);
+        cursor: move;
+    }
+    .title-buttons {
+        display: flex;
+        gap: 6px;
+    }
+    .btn-circle {
+        width: 12px;
+        height: 12px;
+        border-radius: 50%;
+        border: 1px solid rgba(0,0,0,0.4);
+        box-shadow: 0 0 0 1px rgba(0,0,0,0.25);
+        cursor: pointer;
+    }
+    .btn-close { background: #ff5f57; }
+    .btn-minimize { background: #febc2e; }
+    .btn-full { background: #28c840; }
 
-.header-left {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-}
+    .window-title {
+        flex: 1;
+        text-align: center;
+        font-size: 12px;
+        color: #d1d1d1;
+        text-shadow: 0 1px 1px rgba(0,0,0,0.7);
+        pointer-events: none;
+    }
+    .window-content {
+        flex: 1;
+        padding: 12px 14px;
+        font-size: 13px;
+        color: #e4e4e4;
+        background: radial-gradient(circle at top left, #262a40, #141624 55%, #0b0c14);
+    }
+    .window-content pre {
+        background: rgba(0,0,0,0.35);
+        padding: 10px;
+        border-radius: 8px;
+        font-size: 12px;
+        overflow: auto;
+        max-height: 260px;
+    }
+    .window-footer {
+        padding: 6px 10px;
+        font-size: 11px;
+        color: #999;
+        border-top: 1px solid rgba(255,255,255,0.06);
+        background: rgba(8,8,12,0.9);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
 
-.window-dots {
-    display: flex;
-    gap: 4px;
-    margin-right: 8px;
-}
+    .tag-pill {
+        padding: 2px 8px;
+        border-radius: 999px;
+        border: 1px solid rgba(255,255,255,0.3);
+        font-size: 10px;
+        text-transform: uppercase;
+        letter-spacing: 0.04em;
+    }
 
-.dot {
-    width: 10px;
-    height: 10px;
-    border-radius: 50%;
-}
+    /* ПОДСВЕТКА ФОКУСА ОКНА */
+    .window.active {
+        box-shadow:
+            0 25px 60px rgba(0,0,0,0.95),
+            0 0 0 1px rgba(138,180,255,0.7);
+    }
 
-.dot.red { background:#ff5f56; }
-.dot.yellow { background:#ffbd2e; }
-.dot.green { background:#27c93f; }
-
-.header-title {
-    letter-spacing: 0.03em;
-}
-
-.header-right {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-}
-
-.status-pill {
-    border-radius: 999px;
-    border: 1px solid rgba(0,255,127,0.6);
-    padding: 2px 8px;
-    font-size: 11px;
-    color: var(--green);
-    text-transform: uppercase;
-}
-
-#repeatBtn {
-    background: rgba(255,127,0,0.08);
-    border: 1px solid rgba(255,127,0,0.7);
-    color: var(--accent-soft);
-    border-radius: 999px;
-    padding: 2px 10px;
-    font-size: 11px;
-    cursor: pointer;
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
-}
-#repeatBtn:hover {
-    background: rgba(255,127,0,0.18);
-}
-
-/* Основной вывод */
-.output {
-    position: relative;
-    z-index: 1;
-    flex: 1;
-    padding: 14px 16px;
-    overflow-y: auto;
-    background: radial-gradient(circle at top left, rgba(255,127,0,0.13) 0, #050505 45%);
-}
-
-.output::-webkit-scrollbar {
-    width: 6px;
-}
-.output::-webkit-scrollbar-track {
-    background: #050505;
-}
-.output::-webkit-scrollbar-thumb {
-    background: rgba(255,127,0,0.7);
-    border-radius: 3px;
-}
-
-/* Ввод */
-.input-box {
-    position: relative;
-    z-index: 1;
-    display: flex;
-    align-items: center;
-    padding: 8px 14px 10px;
-    border-top: 1px solid rgba(255,127,0,0.4);
-    background: #020202;
-}
-
-.prompt {
-    color: var(--accent-soft);
-    margin-right: 6px;
-    font-weight: 600;
-    position: relative;
-}
-
-/* Мигающий блок-курсор около промпта */
-.prompt::after {
-    content: "█";
-    margin-left: 4px;
-    color: var(--accent-soft);
-    animation: blink 1s steps(1) infinite;
-}
-
-@keyframes blink {
-    0%,50% { opacity: 1; }
-    50.01%,100% { opacity: 0; }
-}
-
-#inp {
-    flex: 1;
-    background: transparent;
-    color: var(--text);
-    border: none;
-    outline: none;
-    font-family: inherit;
-    font-size: 15px;
-    caret-color: var(--accent-soft);
-}
-
-/* Линии */
-.line { 
-    margin-bottom: 2px; 
-    white-space: pre-wrap;
-    word-break: break-word;
-}
-.muted { color: var(--muted); }
-.info { color: var(--cyan); }
-.ok { color: var(--green); }
-.error { color: var(--red); }
-.warn { color: var(--accent-soft); }
-.banner {
-    color: var(--accent);
-    font-weight: bold;
-    text-shadow: 0 0 6px rgba(255,127,0,0.7);
-}
-.result-link { 
-    color: var(--accent-soft); 
-    text-decoration: none; 
-}
-.result-link:hover {
-    text-decoration: underline;
-}
-.result-title {
-    color: var(--green);
-    font-weight: 600;
-}
-.result-index {
-    color: var(--accent-soft);
-    font-weight: 700;
-}
-
-/* Небольшой глоу по низу */
-.terminal::after {
-    content: "";
-    position: absolute;
-    bottom: -40px;
-    left: 50%;
-    width: 60%;
-    height: 80px;
-    transform: translateX(-50%);
-    background: radial-gradient(circle, rgba(255,127,0,0.3) 0, transparent 60%);
-    opacity: 0.7;
-    pointer-events: none;
-}
+    /* АНИМАЦИЯ ПОЯВЛЕНИЯ */
+    .window {
+        opacity: 0;
+        transform: scale(0.95) translateY(10px);
+        animation: fadeInWin 0.2s forwards;
+    }
+    @keyframes fadeInWin {
+        to {
+            opacity: 1;
+            transform: scale(1) translateY(0);
+        }
+    }
 </style>
 </head>
-
 <body>
+<div class="desktop">
 
-<div class="terminal">
-    <div class="header">
-        <div class="header-left">
-            <div class="window-dots">
-                <div class="dot red"></div>
-                <div class="dot yellow"></div>
-                <div class="dot green"></div>
+    <!-- ВЕРХНЯЯ ПАНЕЛЬ -->
+    <div class="menubar">
+        <div class="menubar-left">
+            <span class="apple-logo"></span>
+            <span class="menu-item"><b>Finder</b></span>
+            <span class="menu-item">File</span>
+            <span class="menu-item">Edit</span>
+            <span class="menu-item">View</span>
+            <span class="menu-item">Go</span>
+            <span class="menu-item">Window</span>
+            <span class="menu-item">Help</span>
+        </div>
+        <div class="menubar-center">
+            <span>macOS Web Desktop</span>
+        </div>
+        <div class="menubar-right">
+            <span>🔋</span>
+            <span>📶</span>
+            <span id="clock"></span>
+        </div>
+    </div>
+
+    <!-- ИКОНКИ НА РАБОЧЕМ СТОЛЕ -->
+    <div class="desktop-icons">
+        <div class="desktop-icon" data-open="finder">
+            <div class="desktop-icon-img">📁</div>
+            <span>Macintosh HD</span>
+        </div>
+        <div class="desktop-icon" data-open="about">
+            <div class="desktop-icon-img">💻</div>
+            <span>About This Mac</span>
+        </div>
+    </div>
+
+    <!-- ДОК -->
+    <div class="dock-wrapper">
+        <div class="dock">
+            <div class="dock-item" data-open="finder" title="Finder">
+                <span>📁</span>
+                <div class="dock-dot"></div>
             </div>
-            <div class="header-title">WebScraper-Pro — Terminal Browser Edition</div>
-        </div>
-        <div class="header-right">
-            <div class="status-pill">online</div>
-            <button id="repeatBtn" title="Повторить последний поиск">↻ repeat</button>
+            <div class="dock-item" data-open="code" title="Code">
+                <span>🧑‍💻</span>
+                <div class="dock-dot"></div>
+            </div>
+            <div class="dock-item" data-open="notes" title="Notes">
+                <span>📝</span>
+                <div class="dock-dot"></div>
+            </div>
+            <div class="dock-item" data-open="about" title="About This Mac">
+                <span>🍏</span>
+                <div class="dock-dot"></div>
+            </div>
         </div>
     </div>
 
-    <div class="output" id="out"></div>
+    <!-- ОКНА -->
 
-    <div class="input-box">
-        <div class="prompt">webscraper&gt;</div>
-        <input id="inp" type="text" autocomplete="off" placeholder='пример: search ip scan -a 5'>
+    <!-- Finder -->
+    <div class="window hidden" data-id="finder">
+        <div class="window-titlebar">
+            <div class="title-buttons">
+                <div class="btn-circle btn-close" data-action="close"></div>
+                <div class="btn-circle btn-minimize" data-action="minimize"></div>
+                <div class="btn-circle btn-full" data-action="maximize"></div>
+            </div>
+            <div class="window-title">Finder — Desktop</div>
+        </div>
+        <div class="window-content">
+            <p>Добро пожаловать в веб-копию рабочего стола <b>macOS</b> 🔥</p>
+            <p style="margin-top:8px;">
+                Это просто демо: окна можно перетаскивать, открывать через док и иконки.
+            </p>
+            <pre>
+Desktop
+ ├─ Projects
+ │   ├─ macos_web_desktop.html
+ │   └─ notes.txt
+ └─ Screenshots
+            </pre>
+        </div>
+        <div class="window-footer">
+            <span class="tag-pill">Finder</span>
+            <span>0 items, 0 GB available</span>
+        </div>
     </div>
+
+    <!-- Code -->
+    <div class="window hidden" data-id="code">
+        <div class="window-titlebar">
+            <div class="title-buttons">
+                <div class="btn-circle btn-close" data-action="close"></div>
+                <div class="btn-circle btn-minimize" data-action="minimize"></div>
+                <div class="btn-circle btn-full" data-action="maximize"></div>
+            </div>
+            <div class="window-title">index.html — WebDesktop</div>
+        </div>
+        <div class="window-content">
+            <p>Здесь мог бы быть твой код 😈</p>
+            <pre>&lt;!-- Минималка для старта --&gt;
+&lt;html&gt;
+  &lt;head&gt;
+    &lt;title&gt;macOS Web Desktop&lt;/title&gt;
+  &lt;/head&gt;
+  &lt;body&gt;
+    &lt;!-- рабочий стол --&gt;
+  &lt;/body&gt;
+&lt;/html&gt;</pre>
+        </div>
+        <div class="window-footer">
+            <span class="tag-pill">HTML</span>
+            <span>UTF-8 • 4 spaces</span>
+        </div>
+    </div>
+
+    <!-- Notes -->
+    <div class="window hidden" data-id="notes">
+        <div class="window-titlebar">
+            <div class="title-buttons">
+                <div class="btn-circle btn-close" data-action="close"></div>
+                <div class="btn-circle btn-minimize" data-action="minimize"></div>
+                <div class="btn-circle btn-full" data-action="maximize"></div>
+            </div>
+            <div class="window-title">Заметки</div>
+        </div>
+        <div class="window-content">
+            <p><b>Идеи:</b></p>
+            <ul style="margin-top:6px; margin-left:16px;">
+                <li>Сделать запускаемые иконки приложений</li>
+                <li>Добавить анимацию сворачивания в док</li>
+                <li>Привязать окна к границам экрана</li>
+            </ul>
+        </div>
+        <div class="window-footer">
+            <span class="tag-pill">Notes</span>
+            <span>iCloud · All iDevices</span>
+        </div>
+    </div>
+
+    <!-- About -->
+    <div class="window hidden" data-id="about">
+        <div class="window-titlebar">
+            <div class="title-buttons">
+                <div class="btn-circle btn-close" data-action="close"></div>
+                <div class="btn-circle btn-minimize" data-action="minimize"></div>
+                <div class="btn-circle btn-full" data-action="maximize"></div>
+            </div>
+            <div class="window-title">About This Mac</div>
+        </div>
+        <div class="window-content">
+            <p style="font-size:18px; margin-bottom:4px;">macOS — Web Edition</p>
+            <p>Version 1.0 (HTML/CSS/JS)</p>
+            <p style="margin-top:10px;">Процессор: Whatever inside your browser</p>
+            <p>Память: бесконечная (почти)</p>
+            <p>Графика: CSS + немного магии</p>
+        </div>
+        <div class="window-footer">
+            <span class="tag-pill">System</span>
+            <span>© Ты, текущий владелец этой вкладки</span>
+        </div>
+    </div>
+
 </div>
 
-
 <script>
-/* ============ JS ЛОГИКА ============ */
-const out = document.getElementById("out");
-const inp = document.getElementById("inp");
-const repeatBtn = document.getElementById("repeatBtn");
-
-/* CORS-прокси */
-const PROXY = "https://api.allorigins.win/raw?url=";
-const BING = "https://www.bing.com/search?q=";
-
-/* История команд */
-const history = [];
-let historyIndex = -1;
-
-/* Автодополнение */
-const COMMANDS = ["search", "clear", "help", "date", "about", "repeat"];
-
-/* Для repeat */
-let lastQuery = null;
-let lastAmount = null;
-
-/* Вывод строки */
-function line(text = "", cls = "") {
-    const div = document.createElement("div");
-    div.className = "line" + (cls ? " " + cls : "");
-    div.innerHTML = text;
-    out.appendChild(div);
-    out.scrollTop = out.scrollHeight;
-}
-
-/* Анимация "печати" строки */
-function typeLine(text = "", cls = "", speed = 8) {
-    const div = document.createElement("div");
-    div.className = "line" + (cls ? " " + cls : "");
-    out.appendChild(div);
-    out.scrollTop = out.scrollHeight;
-    let i = 0;
-    function tick() {
-        div.textContent = text.slice(0, i);
-        out.scrollTop = out.scrollHeight;
-        i++;
-        if (i <= text.length) {
-            setTimeout(tick, speed);
-        }
-    }
-    tick();
-}
-
-/* Баннер */
-function banner() {
-    typeLine(" __        __     _     ____                                      ", "banner", 4);
-    typeLine(" \\ \\      / / ___| |__ |  _ \\ _ __ ___   ___ _ __  _ __   ___ _ __", "banner", 4);
-    typeLine("  \\ \\ /\\ / / / _ \\ '_ \\| |_) | '__/ _ \\ / _ \\ '_ \\| '_ \\ / _ \\ '__|", "banner", 4);
-    typeLine("   \\ V  V / |  __/ |_) |  __/| | | (_) |  __/ |_) | |_) |  __/ |   ", "banner", 4);
-    typeLine("    \\_/\\_/   \\___|_.__/|_|   |_|  \\___/ \\___| .__/| .__/ \\___|_|   ", "banner", 4);
-    typeLine("                                           |_|   |_|                ", "banner", 4);
-    setTimeout(() => {
-        line();
-        line("Учебный терминал WebScraper-Pro (Bing, через CORS-прокси)", "muted");
-        line("Команды: search, clear, help, date, about, repeat", "muted");
-        line();
-    }, 500);
-}
-
-banner();
-
-/* Разбор команды */
-function parseCommand(cmdRaw) {
-    const cmd = cmdRaw.trim();
-    if (!cmd) return;
-
-    line("webscraper> " + cmd, "muted");
-
-    // сохраняем в историю
-    history.push(cmd);
-    historyIndex = history.length;
-
-    const parts = cmd.split(" ").filter(Boolean);
-    const base = parts[0].toLowerCase();
-
-    if (base === "clear") {
-        out.innerHTML = "";
-        banner();
-        return;
-    }
-
-    if (base === "help") {
-        line("Доступные команды:", "info");
-        line("  search <запрос> -a N  — поиск в Bing, N результатов (по умолчанию 10)", "muted");
-        line("  repeat                — повторить последний search", "muted");
-        line("  date                  — показать текущую дату/время", "muted");
-        line("  about                 — инфо о терминале", "muted");
-        line("  clear                 — очистить экран", "muted");
-        line("  help                  — эта справка", "muted");
-        line();
-        return;
-    }
-
-    if (base === "date") {
+    // ЧАСЫ В ПРАВОМ ВЕРХУ
+    function updateClock() {
+        const el = document.getElementById('clock');
         const now = new Date();
-        line("[i] " + now.toLocaleString(), "info");
-        line();
-        return;
+        const opts = { hour: '2-digit', minute: '2-digit' };
+        el.textContent = now.toLocaleTimeString([], opts);
+    }
+    updateClock();
+    setInterval(updateClock, 10000);
+
+    // ОТКРЫТИЕ ОКОН
+    const windows = document.querySelectorAll('.window');
+    const dockItems = document.querySelectorAll('.dock-item');
+    const desktopIcons = document.querySelectorAll('.desktop-icon');
+    let zIndexBase = 10;
+
+    function bringToFront(win) {
+        zIndexBase += 1;
+        win.style.zIndex = zIndexBase;
+        windows.forEach(w => w.classList.remove('active'));
+        win.classList.add('active');
     }
 
-    if (base === "about") {
-        line("WebScraper-Pro — Browser Terminal Edition", "ok");
-        line("Учебная версия: Bing HTML + CORS-прокси (AllOrigins)", "muted");
-        line("Автор кода: Educational Example (адаптация под браузер)", "muted");
-        line();
-        return;
+    function openWindow(id) {
+        const win = document.querySelector('.window[data-id="'+id+'"]');
+        if (!win) return;
+        win.classList.remove('hidden');
+        bringToFront(win);
+        const dockItem = document.querySelector('.dock-item[data-open="'+id+'"]');
+        if (dockItem) dockItem.classList.add('active');
     }
 
-    if (base === "repeat") {
-        if (lastQuery) {
-            line("[i] Повторяю последний запрос: " + lastQuery + " (-a " + lastAmount + ")", "info");
-            search(lastQuery, lastAmount);
-        } else {
-            line("[~] Ещё не было ни одного search.", "warn");
-        }
-        return;
+    function closeWindow(win) {
+        const id = win.getAttribute('data-id');
+        win.classList.add('hidden');
+        const dockItem = document.querySelector('.dock-item[data-open="'+id+'"]');
+        if (dockItem) dockItem.classList.remove('active');
     }
 
-    if (base === "search") {
-        let amount = 10;
-        let queryParts = [];
-
-        for (let i = 1; i < parts.length; i++) {
-            if (parts[i] === "-a" && parts[i + 1]) {
-                const n = parseInt(parts[i + 1], 10);
-                if (!isNaN(n) && n > 0) amount = n;
-                i++;
+    dockItems.forEach(item => {
+        item.addEventListener('click', () => {
+            const id = item.getAttribute('data-open');
+            const win = document.querySelector('.window[data-id="'+id+'"]');
+            if (win.classList.contains('hidden')) {
+                openWindow(id);
             } else {
-                queryParts.push(parts[i]);
+                // если уже открыто — просто поднять наверх
+                bringToFront(win);
             }
-        }
+        });
+    });
 
-        const query = queryParts.join(" ").trim();
-        if (!query) {
-            line("[!] Укажи запрос. Пример: search ip scan -a 5", "error");
-            return;
-        }
+    desktopIcons.forEach(icon => {
+        icon.addEventListener('dblclick', () => {
+            const id = icon.getAttribute('data-open');
+            openWindow(id);
+        });
+    });
 
-        lastQuery = query;
-        lastAmount = amount;
-        search(query, amount);
-        return;
-    }
+    // КНОПКИ ОКНА (СВЕРНУТЬ/ЗАКРЫТЬ/ФУЛЛ)
+    windows.forEach(win => {
+        const titlebar = win.querySelector('.window-titlebar');
+        const buttons = win.querySelectorAll('.btn-circle');
 
-    line("[!] Неизвестная команда. Напиши 'help'.", "error");
-}
+        buttons.forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                const action = btn.getAttribute('data-action');
+                if (action === 'close') {
+                    closeWindow(win);
+                } else if (action === 'minimize') {
+                    win.classList.add('hidden');
+                } else if (action === 'maximize') {
+                    if (win.dataset.maximized === '1') {
+                        win.style.top = '80px';
+                        win.style.left = '120px';
+                        win.style.width = '560px';
+                        win.style.height = '';
+                        win.dataset.maximized = '0';
+                    } else {
+                        win.style.top = '26px';
+                        win.style.left = '0';
+                        win.style.width = '100%';
+                        win.style.height = 'calc(100% - 40px)';
+                        win.dataset.maximized = '1';
+                    }
+                }
+                e.stopPropagation();
+            });
+        });
 
-/* Поиск через прокси */
-async function search(q, amount) {
-    line("[i] Запрос: " + q, "info");
-    const target = BING + encodeURIComponent(q);
-    const url = PROXY + encodeURIComponent(target);
-    line("[i] Через прокси: " + url, "info");
-    line();
+        // перетаскивание
+        let isDragging = false;
+        let offsetX = 0, offsetY = 0;
 
-    let html;
-    try {
-        const resp = await fetch(url);
-        if (!resp.ok) {
-            line("[!] Прокси вернул ошибку " + resp.status, "error");
-            return;
-        }
-        html = await resp.text();
-    } catch (err) {
-        line("[!] Ошибка запроса: " + err, "error");
-        return;
-    }
+        titlebar.addEventListener('mousedown', (e) => {
+            if (e.target.classList.contains('btn-circle')) return;
+            isDragging = true;
+            bringToFront(win);
+            const rect = win.getBoundingClientRect();
+            offsetX = e.clientX - rect.left;
+            offsetY = e.clientY - rect.top;
+            document.body.style.cursor = 'move';
+        });
 
-    const doc = new DOMParser().parseFromString(html, "text/html");
-    const results = doc.querySelectorAll("li.b_algo");
+        document.addEventListener('mousemove', (e) => {
+            if (!isDragging) return;
+            let x = e.clientX - offsetX;
+            let y = e.clientY - offsetY;
+            const maxX = window.innerWidth - 120;
+            const maxY = window.innerHeight - 80;
+            if (x < - (win.offsetWidth - 80)) x = - (win.offsetWidth - 80);
+            if (y < 24) y = 24;
+            if (x > maxX) x = maxX;
+            if (y > maxY) y = maxY;
+            win.style.left = x + 'px';
+            win.style.top = y + 'px';
+            win.dataset.maximized = '0';
+            win.style.width = win.style.width || '560px';
+            win.style.height = win.style.height || 'auto';
+        });
 
-    if (!results || results.length === 0) {
-        line("[~] Ничего не найдено или Bing сменил разметку.", "warn");
-        line();
-        return;
-    }
+        document.addEventListener('mouseup', () => {
+            isDragging = false;
+            document.body.style.cursor = 'default';
+        });
 
-    const show = Math.min(amount, results.length);
-    line("[+] Найдено: " + results.length + " | Показываю: " + show, "ok");
-    line();
+        win.addEventListener('mousedown', () => bringToFront(win));
+    });
 
-    for (let i = 0; i < show; i++) {
-        const b = results[i];
-        const a = b.querySelector("h2 a");
-        if (!a) continue;
-
-        const title = a.textContent.trim();
-        const link = a.href;
-        const snip = b.querySelector("p") ? b.querySelector("p").textContent.trim() : "";
-
-        line(`<span class="result-index">${i + 1}.</span> <span class="result-title">${title}</span>`, "ok");
-        line(`<a class="result-link" href="${link}" target="_blank" rel="noopener noreferrer">URL: ${link}</a>`);
-        if (snip) line("   " + snip);
-        line();
-    }
-
-    line("[✓] Готово.", "ok");
-    line();
-}
-
-/* Обработка клавиатуры */
-inp.addEventListener("keydown", (e) => {
-    if (e.key === "Enter") {
-        const value = inp.value;
-        inp.value = "";
-        parseCommand(value);
-        return;
-    }
-
-    // История команд ↑ / ↓
-    if (e.key === "ArrowUp") {
-        if (history.length === 0) return;
-        if (historyIndex > 0) historyIndex--;
-        inp.value = history[historyIndex] || "";
-        setTimeout(() => inp.setSelectionRange(inp.value.length, inp.value.length), 0);
-        e.preventDefault();
-        return;
-    }
-
-    if (e.key === "ArrowDown") {
-        if (history.length === 0) return;
-        if (historyIndex < history.length - 1) {
-            historyIndex++;
-            inp.value = history[historyIndex];
-        } else {
-            historyIndex = history.length;
-            inp.value = "";
-        }
-        setTimeout(() => inp.setSelectionRange(inp.value.length, inp.value.length), 0);
-        e.preventDefault();
-        return;
-    }
-
-    // Автодополнение по Tab
-    if (e.key === "Tab") {
-        const val = inp.value.trim();
-        const parts = val.split(" ");
-        if (parts.length === 1 && parts[0].length > 0) {
-            const prefix = parts[0].toLowerCase();
-            const matches = COMMANDS.filter(c => c.startsWith(prefix));
-            if (matches.length === 1) {
-                inp.value = matches[0] + " ";
-                setTimeout(() => inp.setSelectionRange(inp.value.length, inp.value.length), 0);
-            }
-        }
-        e.preventDefault();
-    }
-});
-
-/* Кнопка repeat в шапке */
-repeatBtn.addEventListener("click", () => {
-    if (lastQuery) {
-        line("webscraper> repeat", "muted");
-        line("[i] Повторяю последний запрос: " + lastQuery + " (-a " + lastAmount + ")", "info");
-        search(lastQuery, lastAmount);
-    } else {
-        line("[~] Повторять нечего — сначала сделай search.", "warn");
-    }
-});
+    // ОТКРЫТЬ FINDER ПО УМОЛЧАНИЮ
+    openWindow('finder');
 </script>
-
 </body>
 </html>
