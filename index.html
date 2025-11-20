@@ -2,8 +2,8 @@
 <html lang="ru">
 <head>
 <meta charset="UTF-8">
-<title>macOS Web Desktop + Safari</title>
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>macOS Web Desktop + Safari Proxy</title>
+<meta nameviewport="width=device-width, initial-scale=1.0">
 <style>
     * {
         box-sizing: border-box;
@@ -21,7 +21,6 @@
         background: radial-gradient(circle at top left, #4e6cfb, #151827 60%, #050510);
         color: #fff;
     }
-
     .desktop {
         position: relative;
         width: 100%;
@@ -294,15 +293,8 @@
         justify-content: space-between;
         gap: 10px;
     }
-    .cm-item span {
-        pointer-events: none;
-    }
     .cm-item:hover {
         background: rgba(255,255,255,0.08);
-    }
-    .cm-item-disabled {
-        opacity: 0.4;
-        pointer-events: none;
     }
     .cm-separator {
         height: 1px;
@@ -356,12 +348,29 @@
     .safari-view {
         flex: 1;
         background: #050510;
+        position: relative;
     }
     .safari-view iframe {
         width: 100%;
         height: 100%;
         border: none;
         background: #050510;
+    }
+    .safari-source-panel {
+        position: absolute;
+        inset: 0;
+        background: rgba(4,4,10,0.96);
+        color: #e5e5e5;
+        font-size: 11px;
+        padding: 8px;
+        display: none;
+    }
+    .safari-source-panel pre {
+        width: 100%;
+        height: 100%;
+        overflow: auto;
+        font-family: "SF Mono", Consolas, monospace;
+        white-space: pre;
     }
 </style>
 </head>
@@ -381,7 +390,7 @@
             <span class="menu-item">Help</span>
         </div>
         <div class="menubar-center">
-            <span>macOS Web Desktop + Safari</span>
+            <span>macOS Web Desktop + Safari Proxy</span>
         </div>
         <div class="menubar-right">
             <span>🔋</span>
@@ -390,7 +399,7 @@
         </div>
     </div>
 
-    <!-- ИКОНКИ НА РАБОЧЕМ СТОЛЕ -->
+    <!-- ИКОНКИ -->
     <div class="desktop-icons" id="desktop-icons">
         <div class="desktop-icon" data-open="finder">
             <div class="desktop-icon-img">📁</div>
@@ -410,24 +419,19 @@
     <div class="dock-wrapper">
         <div class="dock" id="dock">
             <div class="dock-item" data-open="finder" title="Finder">
-                <span>📁</span>
-                <div class="dock-dot"></div>
+                <span>📁</span><div class="dock-dot"></div>
             </div>
             <div class="dock-item" data-open="safari" title="Safari">
-                <span>🌐</span>
-                <div class="dock-dot"></div>
+                <span>🌐</span><div class="dock-dot"></div>
             </div>
             <div class="dock-item" data-open="code" title="Code">
-                <span>🧑‍💻</span>
-                <div class="dock-dot"></div>
+                <span>🧑‍💻</span><div class="dock-dot"></div>
             </div>
             <div class="dock-item" data-open="notes" title="Notes">
-                <span>📝</span>
-                <div class="dock-dot"></div>
+                <span>📝</span><div class="dock-dot"></div>
             </div>
             <div class="dock-item" data-open="about" title="About This Mac">
-                <span>🍏</span>
-                <div class="dock-dot"></div>
+                <span>🍏</span><div class="dock-dot"></div>
             </div>
         </div>
     </div>
@@ -447,14 +451,14 @@
         <div class="window-content">
             <p>Добро пожаловать в веб-клон рабочего стола <b>macOS</b> 🔥</p>
             <p style="margin-top:8px;">
-                Окна перетаскиваются, сворачиваются в док, открываются через иконки и док.
-                Правый клик по рабочему столу, окну или иконке — контекстное меню.
+                Окна перетаскиваются, сворачиваются в док, контекстное меню по правому клику.
+                Safari использует локальный прокси на <code>http://localhost:3000/proxy?url=...</code>
             </p>
             <pre>
 Desktop
  ├─ Projects
  │   ├─ macos_desktop_safari.html
- │   └─ notes.txt
+ │   └─ safari-proxy.js
  └─ Screenshots
             </pre>
         </div>
@@ -476,15 +480,7 @@ Desktop
         </div>
         <div class="window-content">
             <p>Здесь может жить твой код 😈</p>
-            <pre>&lt;!-- Минималка для старта --&gt;
-&lt;html&gt;
-  &lt;head&gt;
-    &lt;title&gt;macOS Web Desktop&lt;/title&gt;
-  &lt;/head&gt;
-  &lt;body&gt;
-    &lt;!-- рабочий стол --&gt;
-  &lt;/body&gt;
-&lt;/html&gt;</pre>
+            <pre>&lt;html&gt;...&lt;/html&gt;</pre>
         </div>
         <div class="window-footer">
             <span class="tag-pill">HTML</span>
@@ -505,9 +501,9 @@ Desktop
         <div class="window-content">
             <p><b>Идеи:</b></p>
             <ul style="margin-top:6px; margin-left:16px;">
-                <li>Добавить ещё окна (Terminal, Settings)</li>
-                <li>Сохранять состояние в localStorage</li>
-                <li>Сделать смену тем</li>
+                <li>Добавить Terminal окно</li>
+                <li>Сохранение позиций окон (localStorage)</li>
+                <li>Тёмно-оранжевая тема (Pornhub style 😏)</li>
             </ul>
         </div>
         <div class="window-footer">
@@ -554,16 +550,21 @@ Desktop
                 <button class="safari-btn safari-back" title="Назад">←</button>
                 <button class="safari-btn safari-forward" title="Вперёд">→</button>
                 <button class="safari-btn safari-reload" title="Обновить">⟳</button>
-                <input class="safari-url-input" type="text" placeholder="Введите URL, например: https://example.com">
+                <input class="safari-url-input" type="text"
+                       placeholder="https://example.com или любой URL">
                 <button class="safari-btn safari-go" title="Перейти">Go</button>
+                <button class="safari-btn safari-source" title="Показать HTML">SRC</button>
             </div>
             <div class="safari-view">
                 <iframe class="safari-frame"></iframe>
+                <div class="safari-source-panel">
+                    <pre class="safari-source-pre"></pre>
+                </div>
             </div>
         </div>
         <div class="window-footer">
             <span class="tag-pill">Safari</span>
-            <span>WebKit (почти)</span>
+            <span>через локальный proxy</span>
         </div>
     </div>
 
@@ -609,7 +610,6 @@ Desktop
     const desktopIcons = document.querySelectorAll('.desktop-icon');
     const windows = document.querySelectorAll('.window');
     const ctxMenu = document.getElementById('context-menu');
-
     let zIndexBase = 10;
     let ctxState = { type: null, target: null };
 
@@ -619,34 +619,24 @@ Desktop
         windows.forEach(w => w.classList.remove('active'));
         win.classList.add('active');
     }
-
     function setDockActive(id, active) {
         const dockItem = document.querySelector('.dock-item[data-open="'+id+'"]');
         if (dockItem) dockItem.classList.toggle('active', active);
     }
-
     function openWindow(id) {
         const win = document.querySelector('.window[data-id="'+id+'"]');
         if (!win) return;
-        win.classList.remove('hidden');
-        win.classList.remove('minimizing');
-        win.classList.remove('visible');
-        requestAnimationFrame(() => {
-            win.classList.add('visible');
-        });
+        win.classList.remove('hidden', 'minimizing', 'visible');
+        requestAnimationFrame(() => win.classList.add('visible'));
         bringToFront(win);
         setDockActive(id, true);
     }
-
     function closeWindow(win) {
         const id = win.getAttribute('data-id');
         win.classList.remove('visible');
-        setTimeout(() => {
-            win.classList.add('hidden');
-        }, 220);
+        setTimeout(() => win.classList.add('hidden'), 220);
         setDockActive(id, false);
     }
-
     function minimizeWindow(win) {
         const id = win.getAttribute('data-id');
         win.classList.add('minimizing');
@@ -655,10 +645,10 @@ Desktop
             win.classList.add('hidden');
             win.classList.remove('minimizing');
         }, 230);
-        setDockActive(id, true); // приложение остаётся "запущенным"
+        setDockActive(id, true);
     }
 
-    // ===== ДОК: открытие =====
+    // ДОК
     dockItems.forEach(item => {
         item.addEventListener('click', () => {
             const id = item.getAttribute('data-open');
@@ -675,8 +665,6 @@ Desktop
             }
         });
     });
-
-    // ===== ДОК: эффект увеличения =====
     dock.addEventListener('mousemove', (e) => {
         const mouseX = e.clientX;
         const maxDist = 120;
@@ -685,20 +673,16 @@ Desktop
             const centerX = rect.left + rect.width / 2;
             const dist = Math.abs(mouseX - centerX);
             let scale = 1.0;
-            if (dist < maxDist) {
-                scale = 1.4 - (dist / maxDist) * 0.4;
-            }
+            if (dist < maxDist) scale = 1.4 - (dist / maxDist) * 0.4;
             const offsetY = (1 - scale) * 18;
             item.style.transform = `translateY(${offsetY}px) scale(${scale})`;
         });
     });
     dock.addEventListener('mouseleave', () => {
-        dockItems.forEach(item => {
-            item.style.transform = '';
-        });
+        dockItems.forEach(item => item.style.transform = '');
     });
 
-    // ===== ИКОНКИ: двойной клик =====
+    // ИКОНКИ
     desktopIcons.forEach(icon => {
         icon.addEventListener('dblclick', () => {
             const id = icon.getAttribute('data-open');
@@ -706,7 +690,7 @@ Desktop
         });
     });
 
-    // ===== КНОПКИ ОКОН + ПЕРЕТАСКИВАНИЕ =====
+    // ОКНА: кнопки/перетаскивание
     windows.forEach(win => {
         const titlebar = win.querySelector('.window-titlebar');
         const buttons = win.querySelectorAll('.btn-circle');
@@ -714,11 +698,9 @@ Desktop
         buttons.forEach(btn => {
             btn.addEventListener('click', (e) => {
                 const action = btn.getAttribute('data-action');
-                if (action === 'close') {
-                    closeWindow(win);
-                } else if (action === 'minimize') {
-                    minimizeWindow(win);
-                } else if (action === 'maximize') {
+                if (action === 'close') closeWindow(win);
+                else if (action === 'minimize') minimizeWindow(win);
+                else if (action === 'maximize') {
                     if (win.dataset.maximized === '1') {
                         win.style.top = '80px';
                         win.style.left = '120px';
@@ -739,7 +721,6 @@ Desktop
 
         let isDragging = false;
         let offsetX = 0, offsetY = 0;
-
         titlebar.addEventListener('mousedown', (e) => {
             if (e.target.classList.contains('btn-circle')) return;
             isDragging = true;
@@ -749,7 +730,6 @@ Desktop
             offsetY = e.clientY - rect.top;
             document.body.style.cursor = 'move';
         });
-
         document.addEventListener('mousemove', (e) => {
             if (!isDragging) return;
             let x = e.clientX - offsetX;
@@ -764,16 +744,14 @@ Desktop
             win.style.top = y + 'px';
             win.dataset.maximized = '0';
         });
-
         document.addEventListener('mouseup', () => {
             isDragging = false;
             document.body.style.cursor = 'default';
         });
-
         win.addEventListener('mousedown', () => bringToFront(win));
     });
 
-    // ===== КОНТЕКСТНОЕ МЕНЮ =====
+    // КОНТЕКСТНОЕ МЕНЮ
     const wallpapers = [
         'radial-gradient(circle at top left, #4e6cfb, #151827 60%, #050510)',
         'radial-gradient(circle at top, #ff7f50, #441122 55%, #050308)',
@@ -785,18 +763,11 @@ Desktop
     function showContextMenu(x, y, type, target) {
         ctxState.type = type;
         ctxState.target = target;
-
         const items = ctxMenu.querySelectorAll('.cm-item');
         items.forEach(item => {
             const scope = (item.dataset.scope || '').split(',').map(s => s.trim());
-            if (scope.includes(type)) {
-                item.classList.remove('cm-item-disabled');
-                item.style.display = 'flex';
-            } else {
-                item.style.display = 'none';
-            }
+            item.style.display = scope.includes(type) ? 'flex' : 'none';
         });
-
         ctxMenu.style.left = x + 'px';
         ctxMenu.style.top = y + 'px';
         const rect = ctxMenu.getBoundingClientRect();
@@ -807,43 +778,29 @@ Desktop
         ctxMenu.style.top = ny + 'px';
         ctxMenu.classList.add('visible');
     }
-
     function hideContextMenu() {
         ctxMenu.classList.remove('visible');
-        ctxState.type = null;
-        ctxState.target = null;
+        ctxState = { type: null, target: null };
     }
-
     document.addEventListener('click', (e) => {
         if (!ctxMenu.contains(e.target)) hideContextMenu();
     });
-    document.addEventListener('scroll', hideContextMenu, true);
     document.addEventListener('keydown', (e) => {
         if (e.key === 'Escape') hideContextMenu();
     });
-
     document.addEventListener('contextmenu', (e) => {
         const inMenu = e.target.closest('.context-menu');
         if (inMenu) return;
-
         const inMenubar = e.target.closest('.menubar');
         const inDock = e.target.closest('.dock-wrapper');
-        if (inMenubar || inDock) return; // браузерное меню
-
+        if (inMenubar || inDock) return;
         e.preventDefault();
-
         const icon = e.target.closest('.desktop-icon');
         const win = e.target.closest('.window');
-
-        if (icon) {
-            showContextMenu(e.clientX, e.clientY, 'icon', icon);
-        } else if (win) {
-            showContextMenu(e.clientX, e.clientY, 'window', win);
-        } else {
-            showContextMenu(e.clientX, e.clientY, 'desktop', desktopRoot);
-        }
+        if (icon) showContextMenu(e.clientX, e.clientY, 'icon', icon);
+        else if (win) showContextMenu(e.clientX, e.clientY, 'window', win);
+        else showContextMenu(e.clientX, e.clientY, 'desktop', desktopRoot);
     });
-
     ctxMenu.addEventListener('click', (e) => {
         const item = e.target.closest('.cm-item');
         if (!item) return;
@@ -856,20 +813,15 @@ Desktop
             const id = target.getAttribute('data-open');
             if (id) openWindow(id);
         }
-
         if (action === 'rename' && type === 'icon') {
             const label = target.querySelector('span');
             const current = label.textContent.trim();
             const name = prompt('Новое имя:', current);
             if (name && name.trim()) label.textContent = name.trim();
         }
-
         if (action === 'delete' && type === 'icon') {
-            if (confirm('Удалить эту иконку с рабочего стола?')) {
-                target.remove();
-            }
+            if (confirm('Удалить эту иконку с рабочего стола?')) target.remove();
         }
-
         if (action === 'properties' && (type === 'icon' || type === 'window')) {
             let info = '';
             if (type === 'icon') {
@@ -883,28 +835,23 @@ Desktop
             }
             alert(info);
         }
-
         if (action === 'new-folder' && (type === 'desktop' || type === 'window')) {
             const iconsContainer = document.getElementById('desktop-icons');
             const div = document.createElement('div');
             div.className = 'desktop-icon';
-            div.innerHTML = `
-                <div class="desktop-icon-img">📂</div>
-                <span>Новая папка</span>
-            `;
+            div.innerHTML = '<div class="desktop-icon-img">📂</div><span>Новая папка</span>';
             iconsContainer.appendChild(div);
             div.addEventListener('dblclick', () => {});
         }
-
         if (action === 'wallpaper' && type === 'desktop') {
             currentWallpaper = (currentWallpaper + 1) % wallpapers.length;
             document.body.style.background = wallpapers[currentWallpaper];
         }
-
         hideContextMenu();
     });
 
-    // ===== SAFARI БРАУЗЕР =====
+    // SAFARI
+    const proxyBase = 'http://localhost:3000/proxy?url=';
     const safariWin = document.querySelector('.window[data-id="safari"]');
     const safariFrame = safariWin.querySelector('.safari-frame');
     const safariUrlInput = safariWin.querySelector('.safari-url-input');
@@ -912,6 +859,9 @@ Desktop
     const safariForwardBtn = safariWin.querySelector('.safari-forward');
     const safariReloadBtn = safariWin.querySelector('.safari-reload');
     const safariGoBtn = safariWin.querySelector('.safari-go');
+    const safariSrcBtn = safariWin.querySelector('.safari-source');
+    const safariSrcPanel = safariWin.querySelector('.safari-source-panel');
+    const safariSrcPre = safariWin.querySelector('.safari-source-pre');
 
     const safariHome = 'https://example.com/';
     let safariHistory = [];
@@ -920,21 +870,19 @@ Desktop
     function normalizeUrl(url) {
         url = url.trim();
         if (!url) return safariHome;
-        if (!/^https?:\/\//i.test(url)) {
-            url = 'https://' + url;
-        }
+        if (!/^https?:\/\//i.test(url)) url = 'https://' + url;
         return url;
     }
-
     function safariUpdateButtons() {
         safariBackBtn.disabled = safariPos <= 0;
         safariForwardBtn.disabled = safariPos === -1 || safariPos >= safariHistory.length - 1;
     }
-
     function safariLoad(url, addToHistory = true) {
         const finalUrl = normalizeUrl(url);
-        safariFrame.src = finalUrl;
+        const proxied = proxyBase + encodeURIComponent(finalUrl);
+        safariFrame.src = proxied;
         safariUrlInput.value = finalUrl;
+        safariSrcPanel.style.display = 'none';
         if (addToHistory) {
             safariHistory = safariHistory.slice(0, safariPos + 1);
             safariHistory.push(finalUrl);
@@ -942,47 +890,39 @@ Desktop
         }
         safariUpdateButtons();
     }
-
     safariBackBtn.addEventListener('click', () => {
         if (safariPos > 0) {
             safariPos -= 1;
-            safariFrame.src = safariHistory[safariPos];
-            safariUrlInput.value = safariHistory[safariPos];
-            safariUpdateButtons();
+            safariLoad(safariHistory[safariPos], false);
         }
     });
-
     safariForwardBtn.addEventListener('click', () => {
         if (safariPos < safariHistory.length - 1) {
             safariPos += 1;
-            safariFrame.src = safariHistory[safariPos];
-            safariUrlInput.value = safariHistory[safariPos];
-            safariUpdateButtons();
+            safariLoad(safariHistory[safariPos], false);
         }
     });
-
     safariReloadBtn.addEventListener('click', () => {
-        if (safariPos >= 0) {
-            safariFrame.src = safariHistory[safariPos];
-        } else {
-            safariLoad(safariHome, true);
-        }
+        if (safariPos >= 0) safariLoad(safariHistory[safariPos], false);
+        else safariLoad(safariHome, true);
     });
-
-    safariGoBtn.addEventListener('click', () => {
-        safariLoad(safariUrlInput.value, true);
-    });
-
+    safariGoBtn.addEventListener('click', () => safariLoad(safariUrlInput.value, true));
     safariUrlInput.addEventListener('keydown', (e) => {
-        if (e.key === 'Enter') {
-            safariLoad(safariUrlInput.value, true);
-        }
+        if (e.key === 'Enter') safariLoad(safariUrlInput.value, true);
     });
 
-    // Инициализация домашней страницы
-    safariLoad(safariHome, true);
+    safariSrcBtn.addEventListener('click', () => {
+        const url = safariPos >= 0 ? safariHistory[safariPos] : safariHome;
+        const proxied = proxyBase + encodeURIComponent(normalizeUrl(url));
+        safariSrcPanel.style.display = 'block';
+        safariSrcPre.textContent = 'Загружаю исходник...';
+        fetch(proxied)
+            .then(r => r.text())
+            .then(txt => { safariSrcPre.textContent = txt; })
+            .catch(err => { safariSrcPre.textContent = 'Ошибка загрузки: ' + err; });
+    });
 
-    // ===== ОТКРЫТЬ FINDER ПО УМОЛЧАНИЮ =====
+    safariLoad(safariHome, true);
     openWindow('finder');
 </script>
 </body>
